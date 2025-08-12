@@ -1,4 +1,4 @@
-const CACHE = "sudoku-v7";
+const CACHE = "sudoku-v8";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {
