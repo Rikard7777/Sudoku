@@ -29,6 +29,11 @@
     h1{margin:0;font-size:clamp(18px,2.6vh,24px)}
     .btn{background:var(--card);color:var(--text);border:1px solid var(--border);padding:.6em 1em;border-radius:12px;cursor:pointer;font-weight:700;touch-action:manipulation;box-shadow:var(--shadow);min-height:44px}
     .btn:active{transform:scale(.98)}
+    /* ikon-knapp och versionsbadge */
+    h1 .ver{font-size:.8em;color:var(--muted);font-weight:600;margin-left:.35em}
+    .btn.icon{width:44px;min-width:44px;height:44px;padding:0;display:grid;place-items:center;font-size:22px}
+    .actions .btn svg.ico{width:24px;height:24px;display:block}
+    .top-right .btn{min-height:40px}
     .btn.primary{background:linear-gradient(180deg,var(--accent),#2760e6);border:0;color:#fff}
     .btn.ghost{background:transparent}
     .row{display:flex;gap:8px;align-items:center}
@@ -77,16 +82,16 @@
     .n.g{color:var(--note2)}
 
     /* Pads & actions */
-    .pads{display:grid;gap:10px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
+    .pads{display:grid;gap:8px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:6px auto;}
     .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
-    .pad button{padding:.6em 0;border-radius:12px;font-size:clamp(18px,5.8vw,28px);height:clamp(48px,7.2vh,56px)}
+    .pad button{padding:.5em 0;border-radius:12px;font-size:clamp(18px,5.8vw,28px);height:clamp(44px,7vh,52px)}
     #padMain button{color:var(--main);border:1px solid var(--grid);background:var(--hl-selected);}  
     #padN1 button{color:var(--note1);border:1px solid var(--grid);background:var(--hl-note1-match);} 
     #padN2 button{color:var(--note2);border:1px solid var(--grid);background:var(--hl-note2-match);} 
     .pad .disabled{opacity:.35;pointer-events:none}
 
-    .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
-    .actions button{padding:.9em .6em}
+    .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:4px auto;}
+    .actions button{padding:.5em 0;font-size:22px}
     #eraseMain{color:var(--main);background:var(--hl-selected)}
     #eraseN1{color:var(--note1);background:var(--hl-note1-match)}
     #eraseN2{color:var(--note2);background:var(--hl-note2-match)}
@@ -112,7 +117,7 @@
 
     <!-- ===== STARTSKÄRM ===== -->
     <section id="screenStart" class="screen active">
-      <h1>Sudoku</h1>
+      <h1>Sudoku <small class="ver" id="verStart"></small></h1>
       <div class="card">
         <h2 style="margin:4px 0 10px">Nytt spel</h2>
         <div class="grid4">
@@ -143,19 +148,19 @@
     <section id="screenGame" class="screen">
       <header class="game">
         <div class="top-left">
-          <button id="btnHome" class="btn">Hem</button>
-          <h1>Sudoku</h1>
-          <div class="stats">
-            <div>Svårighet: <span id="diffTag">–</span></div>
-            <div>Misstag: <span id="mistakes" class="num">0</span></div>
-            <div>Tomma: <span id="empties" class="num">81</span></div>
-          </div>
-        </div>
-        <div class="top-right">
-          <button id="btnCheck" class="btn">Kontrollera</button>
-          <button id="btnSettings" class="btn">Inställningar ⚙️</button>
-        </div>
-      </header>
+          <h1>Sudoku <small class=\"ver\" id=\"verGame\"></small></h1>
+          <div class=\"stats\">
+            <div>Svårighet: <span id=\"diffTag\">–<\/span><\/div>
+            <div>Misstag: <span id=\"mistakes\" class=\"num\">0<\/span><\/div>
+            <div>Tomma: <span id=\"empties\" class=\"num\">81<\/span><\/div>
+          <\/div>
+        <\/div>
+        <div class=\"top-right\">
+          <button id=\"btnHome\" class=\"btn\">Hem<\/button>
+          <button id=\"btnCheck\" class=\"btn\">Kontrollera<\/button>
+          <button id=\"btnSettings\" class=\"btn icon\" title=\"Inställningar\" aria-label=\"Inställningar\">⚙️<\/button>
+        <\/div>
+      <\/header>
 
       <div class="board-wrap"><div id="board" class="board" aria-live="polite"></div></div>
 
@@ -165,16 +170,22 @@
         <div class="pad" id="padN2" aria-label="Anteckningar grön"></div>
       </div>
 
-      <div class="actions">
-        <button id="undo" class="btn">↶ Ångra</button>
-        <button id="redo" class="btn">↷ Gör om</button>
-        <button id="eraseMain" class="btn" title="Radera huvud">Radera</button>
-        <button id="eraseN1" class="btn" title="Radera anteckningar 1">Radera</button>
-        <button id="eraseN2" class="btn" title="Radera anteckningar 2">Radera</button>
-        <button id="hint" class="btn">Hint</button>
-      </div>
+      <div class=\"actions\">
+        <button id=\"undo\" class=\"btn\" title=\"Ångra\" aria-label=\"Ångra\">↶<\/button>
+        <button id=\"redo\" class=\"btn\" title=\"Gör om\" aria-label=\"Gör om\">↷<\/button>
+        <button id=\"eraseMain\" class=\"btn\" title=\"Radera huvud\" aria-label=\"Radera huvud\">
+          <svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16\"/><\/svg>
+        <\/button>
+        <button id=\"eraseN1\" class=\"btn\" title=\"Radera anteckningar 1\" aria-label=\"Radera anteckningar 1\">
+          <svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16\"/><\/svg>
+        <\/button>
+        <button id=\"eraseN2\" class=\"btn\" title=\"Radera anteckningar 2\" aria-label=\"Radera anteckningar 2\">
+          <svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16\"/><\/svg>
+        <\/button>
+        <button id=\"hint\" class=\"btn\" title=\"Hint\" aria-label=\"Hint\">💡<\/button>
+      <\/div>
 
-      <div class="status" id="status">Välj en ruta.</div>
+      <div class=\"status\" id="status">Välj en ruta.</div>
     </section>
   </div>
 
@@ -261,6 +272,7 @@
 <script>
 (()=>{
   /* ===== Pussel ===== */
+  const APP_VERSION = "v. 0.11";
   const PUZZLES = {
     easy:   {p:"530070000600195000098000060800060003400803001700020006060000280000419005000080079", s:"534678912672195348198342567859761423426853791713924856961537284287419635345286179"},
     medium: {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
@@ -295,6 +307,9 @@
     settings: document.getElementById('btnSettings'),
   };
   const pads = { main: document.getElementById('padMain'), n1: document.getElementById('padN1'), n2: document.getElementById('padN2') };
+
+  // visa version i rubrikerna
+  document.querySelectorAll('.ver').forEach(el=> el.textContent = APP_VERSION);
 
   const modal = document.getElementById('modal');
   const chooseModal = document.getElementById('chooseModal');
