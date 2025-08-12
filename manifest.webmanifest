@@ -1,5 +1,4 @@
 {
-  "id": "/Sudoku/",
   "name": "Sudoku",
   "short_name": "Sudoku",
   "start_url": "/Sudoku/",
@@ -8,7 +7,7 @@
   "background_color": "#f5f7fb",
   "theme_color": "#2b6bff",
   "icons": [
-    {"src": "icons/icon-192.png","sizes":"192x192","type":"image/png"},
-    {"src": "icons/icon-512.png","sizes":"512x512","type":"image/png"}
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
