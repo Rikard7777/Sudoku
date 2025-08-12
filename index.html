@@ -55,7 +55,7 @@
 
     /* ===== SPEL ===== */
     header.game{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;width:100%}
-    .top-left{display:flex;
+    .top-left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .stats{display:flex;gap:16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
     .stats .num{color:var(--text);font-weight:700}
     .top-right{display:flex;gap:8px;flex-wrap:wrap}
@@ -272,7 +272,7 @@
 <script>
 (()=>{
   /* ===== Pussel ===== */
-  const APP_VERSION = "v. 0.9.1";
+  const APP_VERSION = "v. 0.9.2";
   const PUZZLES = {
     easy:   {p:"530070000600195000098000060800060003400803001700020006060000280000419005000080079", s:"534678912672195348198342567859761423426853791713924856961537284287419635345286179"},
     medium: {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
@@ -626,3 +626,6 @@
       navigator.serviceWorker.register('./sw.js').catch(()=>{});
     });
   }
+</script>
+</body>
+</html>
