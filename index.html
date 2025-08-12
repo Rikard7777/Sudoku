@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2b6bff" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <title>Sudoku – mobil</title>
   <style>
     /* ===== Bas & teman ===== */
@@ -12,14 +14,14 @@
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:block;min-height:100svh;overflow-y:auto}
     body.theme-light{
       --bg:#f5f7fb; --card:#ffffff; --accent:#2b6bff;
-      --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#6f7f93; --note2:#2fa568;
-      --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#eef1f6; --hl-note2-match:#e9f6ef;
+      --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#e53935; --note2:#2fa568;
+      --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fde9e9; --hl-note2-match:#e9f6ef;
       --error:#d12f2f; --muted:#445066; --text:#121417; --border:#cdd6e6; --grid:#000000; /* svart rutnät i ljust läge */
     }
     body.theme-dark{
       --bg:#0f1115; --card:#171a21; --accent:#4f8cff;
-      --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#9fb0c5; --note2:#6dd79a;
-      --hl-selected:#1c2330; --hl-same:#152033; --hl-same-rc:#101726; --hl-note1-match:#1b2330; --hl-note2-match:#102419;
+      --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#ff7b7b; --note2:#6dd79a;
+      --hl-selected:#1c2330; --hl-same:#152033; --hl-same-rc:#101726; --hl-note1-match:#2b1616; --hl-note2-match:#102419;
       --error:#ff5d5d; --muted:#9aa4b2; --text:#e8eef9; --border:#232838; --grid:#ffffff; /* vitt rutnät i mörkt läge */
     }
 
@@ -90,8 +92,8 @@
     #padN2 button{color:var(--note2);border:1px solid var(--grid);background:var(--hl-note2-match);} 
     .pad .disabled{opacity:.35;pointer-events:none}
 
-    .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:4px auto;}
-    .actions button{padding:.5em 0;font-size:22px}
+    .actions{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:4px auto;}
+    .actions button{padding:.3em 0;font-size:20px;height:44px}
     #eraseMain{color:var(--main);background:var(--hl-selected)}
     #eraseN1{color:var(--note1);background:var(--hl-note1-match)}
     #eraseN2{color:var(--note2);background:var(--hl-note2-match)}
@@ -166,22 +168,16 @@
 
       <div class="pads">
         <div class="pad" id="padMain" aria-label="Huvudsiffror"></div>
-        <div class="pad" id="padN1" aria-label="Anteckningar grå"></div>
-        <div class="pad" id="padN2" aria-label="Anteckningar grön"></div>
+        <div class="pad" id="padN1" aria-label="Anteckningar 1"></div>
+        <div class="pad" id="padN2" aria-label="Anteckningar 2"></div>
       </div>
 
       <div class="actions">
         <button id="undo" class="btn" title="Ångra" aria-label="Ångra">↶</button>
         <button id="redo" class="btn" title="Gör om" aria-label="Gör om">↷</button>
-        <button id="eraseMain" class="btn" title="Radera huvud" aria-label="Radera huvud">
-          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16"/></svg>
-        </button>
-        <button id="eraseN1" class="btn" title="Radera anteckningar 1" aria-label="Radera anteckningar 1">
-          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16"/></svg>
-        </button>
-        <button id="eraseN2" class="btn" title="Radera anteckningar 2" aria-label="Radera anteckningar 2">
-          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16"/></svg>
-        </button>
+        <button id="eraseMain" class="btn" title="Radera huvud" aria-label="Radera huvud">⌫</button>
+        <button id="eraseN1" class="btn" title="Radera anteckningar 1" aria-label="Radera anteckningar 1">⨯</button>
+        <button id="eraseN2" class="btn" title="Radera anteckningar 2" aria-label="Radera anteckningar 2">⨯</button>
         <button id="hint" class="btn" title="Hint" aria-label="Hint">💡</button>
       </div>
 
@@ -203,7 +199,7 @@
       </div>
 
       <div class="switch" style="margin:0 0 16px 0">
-        <input type="checkbox" id="liveValidate" checked />
+        <input type="checkbox" id="liveValidate" />
         <label for="liveValidate">Validering i realtid (Direkt). Av = endast vid "Kontrollera"</label>
       </div>
 
@@ -217,11 +213,11 @@
           <input type="color" id="c-main" value="#1f5eff">
         </div>
         <div>
-          <label>Anteckningar 1 (grå)</label>
-          <input type="color" id="c-note1" value="#6f7f93">
+          <label>Anteckningar 1</label>
+          <input type="color" id="c-note1" value="#e53935">
         </div>
         <div>
-          <label>Anteckningar 2 (grön)</label>
+          <label>Anteckningar 2</label>
           <input type="color" id="c-note2" value="#2fa568">
         </div>
 
@@ -353,7 +349,7 @@
     difficulty:'easy',
     puzzle:"", solution:"", fixed:new Set(),
     main:Array(81).fill('0'), n1:Array(81).fill(0), n2:Array(81).fill(0),
-    sel:null, mistakes:0, live:true, history:[], redo:[]
+    sel:null, mistakes:0, live:false, history:[], redo:[]
   };
 
   /* ===== Helpers ===== */
@@ -415,7 +411,7 @@
     const slot = store.slots[idx]; if(!slot || !slot.state) return;
     currentSlot = idx;
     const s = slot.state;
-    state = { ...state, difficulty:slot.difficulty, puzzle:s.puzzle, solution:s.solution, fixed:new Set(s.fixed||[]), main:s.main, n1:s.n1, n2:s.n2, sel:s.sel||null, mistakes:s.mistakes||0, live:s.live??true, history:[], redo:[] };
+    state = { ...state, difficulty:slot.difficulty, puzzle:s.puzzle, solution:s.solution, fixed:new Set(s.fixed||[]), main:s.main, n1:s.n1, n2:s.n2, sel:s.sel||null, mistakes:s.mistakes||0, live:s.live??false, history:[], redo:[] };
     showGame(); renderBoard(); mistakesEl.textContent=String(state.mistakes); diffTag.textContent=labelForDiff(state.difficulty); refreshHighlights(); setStatus('Återupptaget.'); updateEmpties();
   }
 
@@ -569,7 +565,7 @@
   function loadTheme(){ const t=localStorage.getItem(LS_THEME)||'light'; themeSelect.value=t; setTheme(t); }
   function saveThemeVars(){ const vars={}; for(const [k,id] of Object.entries(colorInputs)){ vars[k]=getComputedStyle(document.body).getPropertyValue(k).trim(); } localStorage.setItem(LS_THEMEVARS, JSON.stringify(vars)); }
   function loadThemeVars(){ try{ const raw=localStorage.getItem(LS_THEMEVARS); if(!raw) return; const vars=JSON.parse(raw); for(const [k,v] of Object.entries(vars)){ document.body.style.setProperty(k, v); const inp=document.getElementById(colorInputs[k]); if(inp) inp.value = toHex(v); } }catch{} }
-  function makeSwatches(){ const isDark=document.body.classList.contains('theme-dark'); const baseBG=isDark?'#0f1115':'#ffffff'; const steps=isDark?[0.2,0.25,0.3,0.35,0.4]:[0.06,0.1,0.14,0.18,0.22]; const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']}; for(const [varName, [cid, baseVar]] of Object.entries(map)){ const baseColor=getComputedStyle(document.body).getPropertyValue(baseVar).trim()||'#1f5eff'; const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t)); const host=document.getElementById(cid); host.innerHTML=''; const current=getComputedStyle(document.body).getPropertyValue(varName).trim(); candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); }); } }
+  function makeSwatches(){ const isDark=document.body.classList.contains('theme-dark'); const baseBG=isDark?'#0f1115':'#ffffff'; const steps=isDark?[0.22,0.28,0.34,0.4]:[0.06,0.12,0.18,0.24]; const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']}; for(const [varName, [cid, baseVar]] of Object.entries(map)){ const baseColor=getComputedStyle(document.body).getPropertyValue(baseVar).trim()||'#1f5eff'; const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t)); const host=document.getElementById(cid); host.innerHTML=''; const current=getComputedStyle(document.body).getPropertyValue(varName).trim(); candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); }); } }
 
   let lastFocused=null; const openSettings=()=>{ lastFocused=document.activeElement; modal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> themeSelect.focus(),0); }; const closeSettings=()=>{ modal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); };
 
@@ -596,6 +592,14 @@
   }
   init();
 })();
+</script>
+<script>
+  // Registrera service worker för PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    });
+  }
 </script>
 </body>
 </html>
