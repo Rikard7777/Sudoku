@@ -14,13 +14,13 @@
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:block;min-height:100svh;overflow-y:auto}
     body.theme-light{
       --bg:#f5f7fb; --card:#ffffff; --accent:#2b6bff;
-      --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#e53935; --note2:#2fa568;
+      --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#ff0000; --note2:#2fa568;
       --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fde9e9; --hl-note2-match:#e9f6ef;
       --error:#d12f2f; --muted:#445066; --text:#121417; --border:#cdd6e6; --grid:#000000; /* svart rutnät i ljust läge */
     }
     body.theme-dark{
       --bg:#0f1115; --card:#171a21; --accent:#4f8cff;
-      --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#ff7b7b; --note2:#6dd79a;
+      --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#ff0000; --note2:#6dd79a;
       --hl-selected:#1c2330; --hl-same:#152033; --hl-same-rc:#101726; --hl-note1-match:#2b1616; --hl-note2-match:#102419;
       --error:#ff5d5d; --muted:#9aa4b2; --text:#e8eef9; --border:#232838; --grid:#ffffff; /* vitt rutnät i mörkt läge */
     }
@@ -206,6 +206,7 @@
         <div>
           <label>Rutnät</label>
           <input type="color" id="c-grid" value="#000000">
+          <div id="sw-grid" class="swatches"></div>
         </div>
         <div>
           <label>Förinskrivna siffror</label>
@@ -216,8 +217,8 @@
           <input type="color" id="c-main" value="#1f5eff">
         </div>
         <div>
-          <label>Anteckningar 1</label>
-          <input type="color" id="c-note1" value="#e53935">
+          <label>Anteckningar 1<\/label>
+          <input type="color" id="c-note1" value="#ff0000">
         </div>
         <div>
           <label>Anteckningar 2</label>
@@ -415,7 +416,7 @@
     currentSlot = idx;
     const s = slot.state;
     state = { ...state, difficulty:slot.difficulty, puzzle:s.puzzle, solution:s.solution, fixed:new Set(s.fixed||[]), main:s.main, n1:s.n1, n2:s.n2, sel:s.sel||null, mistakes:s.mistakes||0, live:s.live??false, history:[], redo:[] };
-    showGame(); renderBoard(); mistakesEl.textContent=String(state.mistakes); diffTag.textContent=labelForDiff(state.difficulty); refreshHighlights(); setStatus('Återupptaget.'); updateEmpties();
+    showGame(); renderBoard(); mistakesEl.textContent=String(state.mistakes); diffTag.textContent = 'Svårighet: ' + labelForDiff(state.difficulty); refreshHighlights(); setStatus('Återupptaget.'); updateEmpties();
   }
 
   function startNewGame(diff, slotIndex){
@@ -426,7 +427,7 @@
     // stats
     store.stats.started += 1; saveApp(); updateStatsUI();
     saveActive();
-    showGame(); renderBoard(); mistakesEl.textContent='0'; diffTag.textContent=labelForDiff(diff); setStatus('Välj en ruta.'); updateEmpties();
+    showGame(); renderBoard(); mistakesEl.textContent='0'; diffTag.textContent = 'Svårighet: ' + labelForDiff(diff); setStatus('Välj en ruta.'); updateEmpties();
   }
 
   function saveActive(){
@@ -568,7 +569,19 @@
   function loadTheme(){ const t=localStorage.getItem(LS_THEME)||'light'; themeSelect.value=t; setTheme(t); }
   function saveThemeVars(){ const vars={}; for(const [k,id] of Object.entries(colorInputs)){ vars[k]=getComputedStyle(document.body).getPropertyValue(k).trim(); } localStorage.setItem(LS_THEMEVARS, JSON.stringify(vars)); }
   function loadThemeVars(){ try{ const raw=localStorage.getItem(LS_THEMEVARS); if(!raw) return; const vars=JSON.parse(raw); for(const [k,v] of Object.entries(vars)){ document.body.style.setProperty(k, v); const inp=document.getElementById(colorInputs[k]); if(inp) inp.value = toHex(v); } }catch{} }
-  function makeSwatches(){ const isDark=document.body.classList.contains('theme-dark'); const baseBG=isDark?'#0f1115':'#ffffff'; const steps=isDark?[0.22,0.28,0.34,0.4]:[0.06,0.12,0.18,0.24]; const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']}; for(const [varName, [cid, baseVar]] of Object.entries(map)){ const baseColor=getComputedStyle(document.body).getPropertyValue(baseVar).trim()||'#1f5eff'; const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t)); const host=document.getElementById(cid); host.innerHTML=''; const current=getComputedStyle(document.body).getPropertyValue(varName).trim(); candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); }); } }
+  function makeSwatches(){
+    const isDark=document.body.classList.contains('theme-dark');
+    const baseBG=isDark?'#0f1115':'#ffffff';
+    const steps=isDark?[0.22,0.28,0.34,0.4]:[0.06,0.12,0.18,0.24];
+    const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']};
+    for(const [varName, [cid, baseVar]] of Object.entries(map)){
+      const baseColor=getComputedStyle(document.body).getPropertyValue(baseVar).trim()||'#1f5eff';
+      const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t));
+      const host=document.getElementById(cid); host.innerHTML='';
+      const current=getComputedStyle(document.body).getPropertyValue(varName).trim();
+      candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); });
+    }
+    // Rutnät – 8 steg från svart till; for(const [varName, [cid, baseVar]] of Object.entries(map)){ const baseColor=getComputedStyle(document.body).getPropertyValue(baseVar).trim()||'#1f5eff'; const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t)); const host=document.getElementById(cid); host.innerHTML=''; const current=getComputedStyle(document.body).getPropertyValue(varName).trim(); candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); }); } }
 
   let lastFocused=null; const openSettings=()=>{ lastFocused=document.activeElement; modal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> themeSelect.focus(),0); }; const closeSettings=()=>{ modal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); };
 
@@ -603,6 +616,3 @@
       navigator.serviceWorker.register('./sw.js').catch(()=>{});
     });
   }
-</script>
-</body>
-</html>
