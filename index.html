@@ -148,19 +148,19 @@
     <section id="screenGame" class="screen">
       <header class="game">
         <div class="top-left">
-          <h1>Sudoku <small class=\"ver\" id=\"verGame\"></small></h1>
-          <div class=\"stats\">
-            <div>Svårighet: <span id=\"diffTag\">–<\/span><\/div>
-            <div>Misstag: <span id=\"mistakes\" class=\"num\">0<\/span><\/div>
-            <div>Tomma: <span id=\"empties\" class=\"num\">81<\/span><\/div>
-          <\/div>
-        <\/div>
-        <div class=\"top-right\">
-          <button id=\"btnHome\" class=\"btn\">Hem<\/button>
-          <button id=\"btnCheck\" class=\"btn\">Kontrollera<\/button>
-          <button id=\"btnSettings\" class=\"btn icon\" title=\"Inställningar\" aria-label=\"Inställningar\">⚙️<\/button>
-        <\/div>
-      <\/header>
+          <h1>Sudoku <small class="ver" id="verGame"></small></h1>
+          <div class="stats">
+            <div>Svårighet: <span id="diffTag">–</span></div>
+            <div>Misstag: <span id="mistakes" class="num">0</span></div>
+            <div>Tomma: <span id="empties" class="num">81</span></div>
+          </div>
+        </div>
+        <div class="top-right">
+          <button id="btnHome" class="btn">Hem</button>
+          <button id="btnCheck" class="btn">Kontrollera</button>
+          <button id="btnSettings" class="btn icon" title="Inställningar" aria-label="Inställningar">⚙️</button>
+        </div>
+      </header>
 
       <div class="board-wrap"><div id="board" class="board" aria-live="polite"></div></div>
 
@@ -170,22 +170,22 @@
         <div class="pad" id="padN2" aria-label="Anteckningar grön"></div>
       </div>
 
-      <div class=\"actions\">
-        <button id=\"undo\" class=\"btn\" title=\"Ångra\" aria-label=\"Ångra\">↶<\/button>
-        <button id=\"redo\" class=\"btn\" title=\"Gör om\" aria-label=\"Gör om\">↷<\/button>
-        <button id=\"eraseMain\" class=\"btn\" title=\"Radera huvud\" aria-label=\"Radera huvud\">
-          <svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16\"/><\/svg>
-        <\/button>
-        <button id=\"eraseN1\" class=\"btn\" title=\"Radera anteckningar 1\" aria-label=\"Radera anteckningar 1\">
-          <svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16\"/><\/svg>
-        <\/button>
-        <button id=\"eraseN2\" class=\"btn\" title=\"Radera anteckningar 2\" aria-label=\"Radera anteckningar 2\">
-          <svg class=\"ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16\"/><\/svg>
-        <\/button>
-        <button id=\"hint\" class=\"btn\" title=\"Hint\" aria-label=\"Hint\">💡<\/button>
-      <\/div>
+      <div class="actions">
+        <button id="undo" class="btn" title="Ångra" aria-label="Ångra">↶</button>
+        <button id="redo" class="btn" title="Gör om" aria-label="Gör om">↷</button>
+        <button id="eraseMain" class="btn" title="Radera huvud" aria-label="Radera huvud">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16"/></svg>
+        </button>
+        <button id="eraseN1" class="btn" title="Radera anteckningar 1" aria-label="Radera anteckningar 1">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16"/></svg>
+        </button>
+        <button id="eraseN2" class="btn" title="Radera anteckningar 2" aria-label="Radera anteckningar 2">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 14 L10 7 a2 2 0 0 1 2.8 0 L20 14 a2 2 0 0 1 0 2.8 L16 21 H7 L3 17 Z M7 21 H16"/></svg>
+        </button>
+        <button id="hint" class="btn" title="Hint" aria-label="Hint">💡</button>
+      </div>
 
-      <div class=\"status\" id="status">Välj en ruta.</div>
+      <div class="status" id="status">Välj en ruta.</div>
     </section>
   </div>
 
