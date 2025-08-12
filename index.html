@@ -32,7 +32,7 @@
     .btn{background:var(--card);color:var(--text);border:1px solid var(--border);padding:.6em 1em;border-radius:12px;cursor:pointer;font-weight:700;touch-action:manipulation;box-shadow:var(--shadow);min-height:44px}
     .btn:active{transform:scale(.98)}
     /* ikon-knapp och versionsbadge */
-    h1 .ver{font-size:.8em;color:var(--muted);font-weight:600;margin-left:.35em}
+    h1 .ver, h1 .diff{font-size:.8em;color:var(--muted);font-weight:600;margin-left:.35em}
     .btn.icon{width:44px;min-width:44px;height:44px;padding:0;display:grid;place-items:center;font-size:22px}
     .actions .btn svg.ico{width:24px;height:24px;display:block}
     .top-right .btn{min-height:40px}
@@ -150,9 +150,8 @@
     <section id="screenGame" class="screen">
       <header class="game">
         <div class="top-left">
-          <h1>Sudoku <small class="ver" id="verGame"></small></h1>
+          <h1>Sudoku <small class="ver" id="verGame"></small> <small class="diff" id="diffInline"></small></h1>
           <div class="stats">
-            <div>Svårighet: <span id="diffTag">–</span></div>
             <div>Misstag: <span id="mistakes" class="num">0</span></div>
             <div>Tomma: <span id="empties" class="num">81</span></div>
           </div>
@@ -204,6 +203,10 @@
       </div>
 
       <div class="grid2">
+        <div>
+          <label>Rutnät</label>
+          <input type="color" id="c-grid" value="#000000">
+        </div>
         <div>
           <label>Förinskrivna siffror</label>
           <input type="color" id="c-prefill" value="#111111">
@@ -268,7 +271,7 @@
 <script>
 (()=>{
   /* ===== Pussel ===== */
-  const APP_VERSION = "v. 0.11";
+  const APP_VERSION = "v. 0.9";
   const PUZZLES = {
     easy:   {p:"530070000600195000098000060800060003400803001700020006060000280000419005000080079", s:"534678912672195348198342567859761423426853791713924856961537284287419635345286179"},
     medium: {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
@@ -289,7 +292,7 @@
   const statusEl = document.getElementById('status');
   const mistakesEl = document.getElementById('mistakes');
   const emptiesEl = document.getElementById('empties');
-  const diffTag = document.getElementById('diffTag');
+  const diffTag = document.getElementById('diffInline');
 
   const buttons = {
     home: document.getElementById('btnHome'),
@@ -316,7 +319,7 @@
   const liveValidateChk = document.getElementById('liveValidate');
 
   const colorInputs = {
-    '--prefill':'c-prefill', '--main':'c-main', '--note1':'c-note1', '--note2':'c-note2',
+    '--grid':'c-grid', '--prefill':'c-prefill', '--main':'c-main', '--note1':'c-note1', '--note2':'c-note2',
     '--hl-selected':'c-hl-selected', '--hl-same':'c-hl-same', '--hl-same-rc':'c-hl-same-rc', '--hl-note1-match':'c-hl-note1', '--hl-note2-match':'c-hl-note2'
   };
 
