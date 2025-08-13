@@ -13,13 +13,15 @@
     html,body{height:100%}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Noto Sans,sans-serif;background:var(--bg);color:var(--text);display:block;min-height:100svh;overflow-y:auto}
     body.theme-light{
-      --bg:#f5f7fb; --card:#ffffff; --accent:#2b6bff; --btn:#eaf0ff; --btn2:#eef2ff; --badge:#f3f6ff; --grid:#111111;
-      --prefill:#111111; --prefill-bg:#f4f6ff; --num:#1b3e8a; --note1:#d12f2f; --note2:#2fa568; --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fff0f0; --hl-note2-match:#f2fff5;
+      --bg:#f5f7fb; --card:#ffffff; --accent:#2b6bff;
+      --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#ff0000; --note2:#2fa568;
+      --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fde9e9; --hl-note2-match:#e9f6ef;
       --error:#d12f2f; --muted:#445066; --text:#121417; --border:#d8deea
     }
     body.theme-dark{
-      --bg:#0c0f14; --card:#151a22; --accent:#2b6bff; --btn:#1a2230; --btn2:#0f172a; --badge:#101725; --grid:#f1f5f9;
-      --prefill:#f1f5f9; --prefill-bg:#0f1626; --num:#cbe0ff; --note1:#ff6b6b; --note2:#60d394; --hl-selected:#14223d; --hl-same:#1a2744; --hl-same-rc:#141e33; --hl-note1-match:#2a1313; --hl-note2-match:#102a18;
+      --bg:#0c0f14; --card:#151a22; --accent:#2b6bff;
+      --prefill:#f1f5f9; --prefill-bg:#0f1626; --main:#cbe0ff; --note1:#ff6b6b; --note2:#60d394;
+      --hl-selected:#14223d; --hl-same:#1a2744; --hl-same-rc:#141e33; --hl-note1-match:#2a1313; --hl-note2-match:#102a18;
       --error:#ff6b6b; --muted:#8ca0bf; --text:#f4f7fb; --border:#202a3a
     }
 
@@ -37,7 +39,7 @@
     .col{display:flex;flex-direction:column;gap:8px}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
-    .btn{appearance:none;border:1px solid var(--border);background:var(--btn);color:var(--text);border-radius:16px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+    .btn{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:16px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
     .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
     .btn.icon{display:grid;place-items:center;padding:8px 12px}
 
@@ -57,7 +59,7 @@
     .board-wrap{width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
     .board{position:relative;display:grid;grid-template-columns:repeat(9,1fr);aspect-ratio:1/1;background:var(--card);border-radius:16px;overflow:hidden;border:2px solid var(--grid);box-shadow:var(--shadow)}
     .cell{position:relative;border:1px solid var(--grid);display:grid;place-items:center;font-size:20px;font-weight:820;line-height:1;letter-spacing:.2px;font-variant-numeric:tabular-nums;user-select:none}
-    .cell input{width:100%;height:100%;text-align:center;background:transparent;border:0;outline:0;font:inherit;color:var(--num);font-weight:inherit;pointer-events:none;caret-color:transparent}
+    .cell input{width:100%;height:100%;text-align:center;background:transparent;border:0;outline:0;font:inherit;color:var(--main);font-weight:inherit;pointer-events:none;caret-color:transparent}
     .cell.readonly input{color:var(--prefill)}
     .cell.readonly{background:var(--prefill-bg)}
     /* 3x3 block tjockare linjer */
@@ -74,7 +76,7 @@
 
     .pad-title{font-size:14px;color:var(--muted);margin:12px 0 8px}
     .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
-    .key{display:grid;place-items:center;height:44px;border-radius:14px;background:var(--btn2);border:1px solid var(--border);font-weight:800;cursor:pointer}
+    .key{display:grid;place-items:center;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--border);font-weight:800;cursor:pointer}
 
     .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
@@ -223,7 +225,7 @@
     </div>
   </div>
 
-  <!-- ===== Välj svårighet (mobilvänlig) ===== -->
+  <!-- (Välj svårighet-modal finns kvar i DOM men används inte längre) -->
   <div id="chooseModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="chooseTitle">
     <div class="panel">
       <h2 id="chooseTitle">Välj svårighet</h2>
@@ -332,11 +334,10 @@
   function makeSwatches(el, arr, onPick){ el.innerHTML=''; arr.forEach(col=>{ const b=document.createElement('button'); b.className='swatch'; b.style.background=col; b.onclick=()=> onPick(col,b); el.appendChild(b); }); }
 
   function applyThemeVars(vars){
-    const root = document.body.classList.contains('theme-dark') ? document.body : document.body; // placeholder
     const set=(k,v)=> document.body.style.setProperty(k, v);
     if(vars.grid) set('--grid', vars.grid);
     if(vars.prefill) set('--prefill', vars.prefill);
-    if(vars.main) set('--num', vars.main);
+    if(vars.main) set('--main', vars.main);
     if(vars.note1) set('--note1', vars.note1);
     if(vars.note2) set('--note2', vars.note2);
     if(vars.hlSelected) set('--hl-selected', vars.hlSelected);
@@ -353,7 +354,7 @@
   function commitThemeVars(){ const v = {
     grid:getComputedStyle(document.body).getPropertyValue('--grid').trim(),
     prefill:getComputedStyle(document.body).getPropertyValue('--prefill').trim(),
-    main:getComputedStyle(document.body).getPropertyValue('--num').trim(),
+    main:getComputedStyle(document.body).getPropertyValue('--main').trim(),
     note1:getComputedStyle(document.body).getPropertyValue('--note1').trim(),
     note2:getComputedStyle(document.body).getPropertyValue('--note2').trim(),
     hlSelected:getComputedStyle(document.body).getPropertyValue('--hl-selected').trim(),
@@ -411,7 +412,9 @@
   }
 
   function startNewGame(diff, slotIndex){
-    const p = PUZZLES[diff];
+    const list = PUZZLES[diff] || [];
+    const p = list[Math.floor(Math.random()*list.length)];
+    if(!p){ alert('Inga pussel för '+diff); return; }
     state = { difficulty:diff, puzzle:p.p, solution:p.s, fixed:new Set(), values:Array(81).fill(0), notes1:Array.from({length:81},()=>new Set()), notes2:Array.from({length:81},()=>new Set()), mistakes:0, live:liveValidateChk.checked, history:[], redo:[] };
     for(let i=0;i<81;i++) if(p.p[i]!== '0') state.fixed.add(i);
     currentSlot = slotIndex;
@@ -440,19 +443,19 @@
     for(let r=0;r<9;r++) for(let c=0;c<9;c++){
       const i=id(r,c);
       const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i;
-      const input=document.createElement('input'); input.setAttribute('inputmode','none'); input.setAttribute('readonly',''); input.value= state.values[i] ? String(state.values[i]) : '';
+      const input=document.createElement('input'); input.setAttribute('inputmode','none'); input.setAttribute('readonly','');
+      input.value= state.fixed.has(i) ? String(pChar(state.puzzle,i)) : (state.values[i] ? String(state.values[i]) : '');
       if(state.fixed.has(i)) cell.classList.add('readonly');
       cell.appendChild(input);
       cell.addEventListener('click',()=> selectCell(i));
       cell.addEventListener('keydown', onCellKey);
       boardEl.appendChild(cell);
     }
-    // place thicker lines markers
-    document.querySelectorAll('.cell').forEach(el=>{
-      const r=+el.dataset.r, c=+el.dataset.c; if(r%3===0) el.setAttribute('data-r', String(r)); if(c%3===0) el.setAttribute('data-c', String(c));
-    });
+    document.querySelectorAll('.cell').forEach(el=>{ const r=+el.dataset.r, c=+el.dataset.c; if(r%3===0) el.setAttribute('data-r', String(r)); if(c%3===0) el.setAttribute('data-c', String(c)); });
     drawHighlights();
   }
+
+  function pChar(p,i){ return +p[i] || 0; }
 
   function drawHighlights(){
     const cells=[...document.querySelectorAll('.cell')];
@@ -460,12 +463,10 @@
     const [r,c]=rc(state.sel);
     const v=state.values[state.sel];
     cells[state.sel]?.classList.add('selected');
-    // related row/col/box
     for(let k=0;k<9;k++){ cells[id(r,k)]?.classList.add('related'); cells[id(k,c)]?.classList.add('related'); }
     const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3; for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++) cells[id(br+rr,bc+cc)]?.classList.add('related');
     if(v){
       for(let i=0;i<81;i++) if(state.values[i]===v) cells[i]?.classList.add('sameNum');
-      // same num row/col
       for(let k=0;k<9;k++){ if(state.values[id(r,k)]===v) cells[id(r,k)].classList.add('sameNumRC'); if(state.values[id(k,c)]===v) cells[id(k,c)].classList.add('sameNumRC'); }
     }
     if(state.live) validateConflicts();
@@ -543,38 +544,19 @@
   // Theme vars restore
   applyThemeVars(loadThemeVars());
 
-  // Choose modal (mobile friendly new game)
-  function openChoose(){ chooseModal.classList.add('open'); appRoot.setAttribute('inert',''); chooseList.innerHTML=''; ['Lätt','Medel','Svår','Mästare'].forEach((t,i)=>{ const diff=['easy','medium','hard','master'][i]; const b=document.createElement('button'); b.className='btn'; b.textContent=t; b.onclick=()=>{ closeChoose(); startNewGame(diff, findSlotToUse()); }; chooseList.appendChild(b);}); setTimeout(()=> chooseList.querySelector('button')?.focus(),0); }
-  function closeChoose(){ chooseModal.classList.remove('open'); appRoot.removeAttribute('inert'); }
+  // Startskärm: knappar startar direkt (ingen extra meny)
+  document.querySelectorAll('[data-new]').forEach(btn=> btn.onclick = ()=> startNewGame(btn.dataset.new, findSlotToUse()));
 
-  // Start screen buttons use modal to choose slot
-  document.querySelectorAll('[data-new]').forEach((btn,idx)=> btn.onclick = ()=> openChoose());
+  function findSlotToUse(){ for(let i=0;i<3;i++) if(!store.slots[i]?.state && !store.slots[i]?.locked) return i; for(let i=0;i<3;i++) if(!store.slots[i]?.locked) return i; return 0; }
 
-  function findSlotToUse(){ // prefer empty → else first unlocked slot
-    for(let i=0;i<3;i++) if(!store.slots[i]?.state && !store.slots[i]?.locked) return i; for(let i=0;i<3;i++) if(!store.slots[i]?.locked) return i; return 0;
-  }
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSettings(); });
 
-  function saveThemeInput(inp, varName){ document.body.style.setProperty(varName, inp.value); commitThemeVars(); }
-  colorInputs.grid.oninput=()=> saveThemeInput(colorInputs.grid,'--grid');
-  colorInputs.prefill.oninput=()=> saveThemeInput(colorInputs.prefill,'--prefill');
-  colorInputs.main.oninput=()=> saveThemeInput(colorInputs.main,'--num');
-  colorInputs.note1.oninput=()=> saveThemeInput(colorInputs.note1,'--note1');
-  colorInputs.note2.oninput=()=> saveThemeInput(colorInputs.note2,'--note2');
-  colorInputs.hlSelected.oninput=()=> saveThemeInput(colorInputs.hlSelected,'--hl-selected');
-  colorInputs.hlSame.oninput=()=> saveThemeInput(colorInputs.hlSame,'--hl-same');
+  /* ===== Init ===== */
+  function init(){ renderSlots(); updateStatsUI(); buildPads(); }
+  function buildPads(){ ['main','n1','n2'].forEach(()=>{}); }
+  init();
 
-  function updateStartVer(){ document.querySelectorAll('.ver').forEach(el=> el.textContent = APP_VERSION); }
-
-  // Init
-  updateStartVer();
-  renderSlots();
-  updateStatsUI();
-
-  function openNewGame(diff){ const slot=findSlotToUse(); startNewGame(diff,slot); }
-
-  document.addEventListener('keydown', (e)=>{
-    if(e.key==='Escape') closeSettings();
-  });
+  function updateEmpties(){ let n=0; for(let i=0;i<81;i++) if(!state.values[i]) n++; emptiesEl.textContent=String(n); return n; }
 
   function updateEmptiesHeader(){ emptiesEl.textContent = String(state.values.filter(v=>!v).length); }
 
