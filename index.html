@@ -1,908 +1,631 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Sudoku</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2b6bff" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Sudoku – mobil</title>
+  <style>
+    /* ===== Bas & teman ===== */
+    :root{ --shadow:0 8px 24px rgba(11,20,43,.08); }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:block;min-height:100svh;overflow-y:auto}
+    body.theme-light{
+      --bg:#f5f7fb; --card:#ffffff; --accent:#2b6bff;
+      --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#ff0000; --note2:#2fa568;
+      --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fde9e9; --hl-note2-match:#e9f6ef;
+      --error:#d12f2f; --muted:#445066; --text:#121417; --border:#cdd6e6; --grid:#000000; /* svart rutnät i ljust läge */
+    }
+    body.theme-dark{
+      --bg:#0f1115; --card:#171a21; --accent:#4f8cff;
+      --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#ff4747; --note2:#6dd79a;
+      --hl-selected:#1c2330; --hl-same:#152033; --hl-same-rc:#101726; --hl-note1-match:#2b1616; --hl-note2-match:#102419;
+      --error:#ff5d5d; --muted:#9aa4b2; --text:#e8eef9; --border:#232838; --grid:#ffffff; /* vitt rutnät i mörkt läge */
+    }
 
-<!-- PWA -->
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#2563eb">
+    .wrap{margin:0 auto;display:grid;gap:12px;place-items:center;width:100%;max-width:520px;padding:calc(10px + env(safe-area-inset-top)) 12px calc(140px + env(safe-area-inset-bottom));}
 
-<style>
-:root{
-  /* Tema-variabler (sparas/uppdateras i Inställningar) */
-  --bg: #ffffff;
-  --fg: #111111;
-  --grid: #000000;
-  --given: #000000;
-  --main: #1d4ed8;    /* blå */
-  --note1: #ff0000;   /* röd (mobilvänlig) */
-  --note2: #16a34a;   /* grön */
-  --hl-rcb: #e9e9ff;  /* rad/kol/box highlight */
-  --hl-same: #e4e7ff; /* samma siffra highlight */
-  --cell-selected: #c7d2fe;
-  --error: #ffebee;
+    /* ===== Gemensamma UI ===== */
+    h1{margin:0;font-size:clamp(18px,2.6vh,24px);display:flex;gap:.5ch;align-items:baseline;white-space:nowrap}
+    .btn{background:var(--card);color:var(--text);border:1px solid var(--border);padding:.6em 1em;border-radius:12px;cursor:pointer;font-weight:700;touch-action:manipulation;box-shadow:var(--shadow);min-height:44px}
+    .btn:active{transform:scale(.98)}
+    /* ikon-knapp och versionsbadge */
+    h1 .ver, h1 .diff{font-size:.8em;color:var(--muted);font-weight:600;margin-left:.35em}
+    .btn.icon{width:44px;min-width:44px;height:44px;padding:0;display:grid;place-items:center;font-size:22px}
+    .actions .btn svg.ico{width:24px;height:24px;display:block}
+    .top-right .btn{min-height:40px}
+    .btn.primary{background:linear-gradient(180deg,var(--accent),#2760e6);border:0;color:#fff}
+    .btn.ghost{background:transparent}
+    .row{display:flex;gap:8px;align-items:center}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;box-shadow:var(--shadow);width:100%}
+    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 
-  --cell-size: min(9.6vw, 44px);
-  --gap: 10px;
-  --radius: 14px;
-  --shadow: 0 6px 18px rgba(0,0,0,.08);
-}
+    /* ===== Skärmar ===== */
+    .screen{display:none;width:100%}
+    .screen.active{display:block}
 
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0b0b0f; --fg:#f5f5f7;
-    --grid:#f5f5f5; --given:#f5f5f5;
-    --hl-rcb:#202033; --hl-same:#27274a;
-    --cell-selected:#3943a3; --error:#4c1d1d;
-  }
-}
+    /* ===== START ===== */
+    .slot{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:12px}
+    .slot .meta{font-size:12px;color:var(--muted)}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .stats-grid .stat{padding:10px;border:1px solid var(--border);border-radius:12px;text-align:center;background:var(--card)}
+    .stats-grid .stat strong{display:block;font-size:20px}
 
-html,body{height:100%}
-body{
-  margin:0;
-  font:16px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, sans-serif;
-  background:var(--bg);
-  color:var(--fg);
-}
+    /* ===== SPEL ===== */
+    header.game{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;grid-template-areas:"title actions""stats actions";gap:8px;align-items:center;width:100%}
+    .top-left{grid-area:title;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+    .stats{grid-area:stats;display:flex;gap:16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+    .stats .num{color:var(--text);font-weight:700}
+    .top-right{grid-area:actions;display:flex;gap:8px;flex-wrap:wrap;justify-self:end}
 
-/* ---------- App Layout ---------- */
-.wrap{max-width:1024px;margin-inline:auto;padding:16px}
-h1{margin:0;font-weight:700;letter-spacing:.2px}
-h1 small{font-weight:600;opacity:.8;margin-left:.5ch}
-section{margin-block:18px}
+    .board-wrap{width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
+    .board{position:relative;display:grid;grid-template-columns:repeat(9,1fr);aspect-ratio:1/1;background:var(--card);border-radius:16px;overflow:hidden;border:2px solid var(--grid);box-shadow:var(--shadow)}
+    .cell{position:relative;border:1px solid var(--grid);display:grid;place-items:center;font-variant-numeric:tabular-nums;user-select:none}
+    .cell input{width:100%;height:100%;text-align:center;background:transparent;border:0;outline:none;color:var(--main);font-size:clamp(18px,6.2vw,32px);font-weight:800;caret-color:transparent;pointer-events:none;}
+    .cell.readonly input{color:var(--prefill)}
+    .cell.readonly{background:var(--prefill-bg)}
+    /* 3x3 block tjockare linjer */
+    .cell[data-r="3"], .cell[data-r="6"]{ border-bottom:2px solid var(--grid); }
+    .cell[data-c="3"], .cell[data-c="6"]{ border-right:2px solid var(--grid); }
 
-/* ---------- Start Screen ---------- */
-.card{
-  background:rgba(127,127,127,.06);
-  border:1px solid rgba(127,127,127,.18);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:16px;
-}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:720px){.grid-2{grid-template-columns:1fr}}
+    /* Highlights */
+    .cell.noteMatch1{background:var(--hl-note1-match)}
+    .cell.noteMatch2{background:var(--hl-note2-match)}
+    .cell.sameNumRC{background:var(--hl-same-rc)}
+    .cell.sameNum{background:var(--hl-same)}
+    .cell.selected{background:var(--hl-selected);box-shadow:inset 0 0 0 2px var(--grid);} .cell.related{background:var(--hl-selected)}
+    .cell.error input{color:var(--error)}
 
-.btn{
-  appearance:none;border:0;border-radius:18px;padding:12px 16px;
-  background:#eef2ff;color:#111;font-weight:600;
-  box-shadow:var(--shadow);cursor:pointer
-}
-.btn:active{transform:translateY(1px)}
-.btn.primary{background:#dbeafe}
-.btn.blue{background:#dbeafe}
-.btn.red{background:#fee2e2}
-.btn.green{background:#dcfce7}
-.btn.gray{background:#f1f5f9}
-.btn.icon{padding:10px 14px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    /* Notes */
+    .notes{position:absolute;inset:4% 4%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:2px;pointer-events:none}
+    .n{font-size:clamp(9px,2.8vw,14px);line-height:1;color:var(--note1);opacity:.95;display:flex;align-items:center;justify-content:center}
+    .n.g{color:var(--note2)}
 
-.list{display:grid;gap:10px}
-.slot{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(127,127,127,.06);padding:10px;border-radius:12px;border:1px solid rgba(127,127,127,.2)}
-.slot b{font-weight:700}
-.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.kpi .box{background:rgba(127,127,127,.06);border:1px solid rgba(127,127,127,.2);border-radius:12px;padding:12px;text-align:center}
-.kpi .val{font-size:20px;font-weight:800}
+    /* Pads & actions */
+    .pads{display:grid;gap:8px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:6px auto;}
+    .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+    .pad button{padding:.5em 0;border-radius:12px;font-size:clamp(18px,5.8vw,28px);height:clamp(44px,7vh,52px)}
+    #padMain button{color:var(--main);border:1px solid var(--grid);background:var(--hl-selected);}  
+    #padN1 button{color:var(--note1);border:1px solid var(--grid);background:var(--hl-note1-match);} 
+    #padN2 button{color:var(--note2);border:1px solid var(--grid);background:var(--hl-note2-match);} 
+    .pad .disabled{opacity:.35;pointer-events:none}
 
-/* ---------- Game Header (two rows) ---------- */
-header.game{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  grid-template-areas:
-    "title actions"
-    "stats actions";
-  gap:6px 10px;
-  align-items:center;
-  margin-bottom:12px;
-}
-.top-left{grid-area:title;display:flex;gap:.6ch;align-items:baseline;flex-wrap:wrap}
-.top-right{grid-area:actions;display:flex;gap:8px;justify-self:end;flex-wrap:wrap}
-.stats{grid-area:stats;display:flex;gap:16px;flex-wrap:wrap}
-.stats .num{font-weight:800}
+    .actions{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:4px auto;}
+    .actions button{padding:.3em 0;font-size:20px;height:44px}
+    #eraseMain{color:var(--main);background:var(--hl-selected)}
+    #eraseN1{color:var(--note1);background:var(--hl-note1-match)}
+    #eraseN2{color:var(--note2);background:var(--hl-note2-match)}
 
-/* ---------- Board ---------- */
-.board{display:grid;grid-template-columns:repeat(9,var(--cell-size));grid-template-rows:repeat(9,var(--cell-size));gap:0;touch-action:manipulation;user-select:none;margin-inline:auto;border:2px solid var(--grid);border-radius:10px;overflow:hidden}
-.cell{
-  display:grid;place-items:center;position:relative;background:#fff0;
-  border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);
-  outline:none;cursor:pointer;font-weight:720;
-}
-.cell[data-r="2"], .cell[data-r="5"]{box-shadow:0 2px 0 0 var(--grid) inset}
-.cell[data-c="2"], .cell[data-c="5"]{box-shadow:2px 0 0 0 var(--grid) inset}
-.cell.given{color:var(--given)}
-.cell.main{color:var(--main)}
-.cell .note1, .cell .note2{
-  position:absolute;inset:3px;border-radius:6px;padding:2px;font-size:11px;line-height:1.05;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:1px;opacity:.95;pointer-events:none
-}
-.cell .note1{color:var(--note1)}
-.cell .note2{color:var(--note2)}
-.cell .n{display:grid;place-items:center}
-.cell.selected{background:var(--cell-selected)}
-.cell.rcb{background:var(--hl-rcb)}
-.cell.same{background:var(--hl-same)}
-.cell.error{background:var(--error)}
-.cell:focus-visible{outline:2px solid #93c5fd;outline-offset:-2px}
+    .status{min-height:1.4em;color:var(--muted);font-size:14px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
 
-/* ---------- Pads & Actions ---------- */
-.pad-title{font-size:13px;opacity:.7;margin-top:14px}
-.pad{display:grid;grid-template-columns:repeat(9,1fr);gap:10px}
-.key{display:grid;place-items:center;border-radius:16px;height:44px;font-weight:800;background:#dbeafe;color:#0b1020;border:0;cursor:pointer;box-shadow:var(--shadow)}
-.key.red{background:#fee2e2}
-.key.green{background:#dcfce7}
-.key.gray{background:#e2e8f0}
-.key:active{transform:translateY(1px)}
-
-.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-
-/* ---------- Settings Sheet ---------- */
-.sheet{
-  position:fixed;inset:0;background:rgba(0,0,0,.28);display:none;align-items:flex-end;z-index:40
-}
-.sheet.open{display:flex}
-.panel{
-  background:var(--bg);color:var(--fg);border-radius:18px 18px 0 0;padding:16px 16px 24px;box-shadow:0 -20px 40px rgba(0,0,0,.25);width:100%;
-  max-height:min(86vh,900px);overflow:auto;
-}
-.panel h2{margin-top:0}
-.swatches{display:flex;gap:6px;flex-wrap:wrap}
-.swatch{width:28px;height:22px;border-radius:6px;border:2px solid rgba(0,0,0,.15);cursor:pointer}
-.row.mid{align-items:center}
-label{display:block;margin:10px 0 6px}
-
-hr{border:0;border-top:1px solid rgba(127,127,127,.25);margin:14px 0}
-.small{font-size:12px;opacity:.75}
-.hidden{display:none}
-
-/* Accessibility helpers */
-.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-</style>
+    /* Modal (inställningar + välj slot) */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:12px}
+    .modal.open{display:flex}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;max-width:720px;width:100%;box-shadow:var(--shadow)}
+    .panel h2{margin:.2em 0 8px 0;font-size:18px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .panel label{font-size:12px;color:var(--muted)}
+    .panel input[type='color']{width:100%;height:40px;border:1px solid var(--border);border-radius:8px;background:var(--card)}
+    .switch{display:flex;align-items:center;gap:8px}
+    .swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .swatch{width:28px;height:24px;border-radius:6px;border:1px solid var(--border);cursor:pointer;outline-offset:2px}
+    .swatch.is-selected{outline:3px solid var(--accent)}
+  </style>
 </head>
-<body>
+<body class="theme-light">
+  <div class="wrap" id="appRoot">
 
-<div id="screen-start" class="wrap">
-  <h1>Sudoku <small id="verStart"></small></h1>
+    <!-- ===== STARTSKÄRM ===== -->
+    <section id="screenStart" class="screen active">
+      <h1>Sudoku <small class="ver" id="verStart"></small></h1>
+      <div class="card">
+        <h2 style="margin:4px 0 10px">Nytt spel</h2>
+        <div class="grid4">
+          <button class="btn primary" data-new="easy">Lätt</button>
+          <button class="btn primary" data-new="medium">Medel</button>
+          <button class="btn primary" data-new="hard">Svår</button>
+          <button class="btn primary" data-new="master">Mästare</button>
+        </div>
+      </div>
 
-  <section class="card">
-    <h3>Nytt spel</h3>
-    <div class="row">
-      <button class="btn primary" data-new="easy">Lätt</button>
-      <button class="btn primary" data-new="medium">Medel</button>
-      <button class="btn primary" data-new="hard">Svår</button>
-      <button class="btn primary" data-new="master">Mästare</button>
-    </div>
-  </section>
+      <div class="card">
+        <h2 style="margin:4px 0 10px">Fortsätt</h2>
+        <div id="slotList" class="col" style="display:grid;gap:8px"></div>
+      </div>
 
-  <section class="grid-2">
-    <div class="card">
-      <h3>Fortsätt</h3>
-      <div id="slots" class="list"></div>
-      <div class="small">Max två låsta. Autosparning sker löpande.</div>
-    </div>
+      <div class="card">
+        <h2 style="margin:4px 0 10px">Statistik</h2>
+        <div class="stats-grid">
+          <div class="stat"><strong id="stStarted">0</strong>Startade</div>
+          <div class="stat"><strong id="stCompleted">0</strong>Klara</div>
+          <div class="stat"><strong id="stAvg">0</strong>Snitt misstag</div>
+          <div class="stat"><strong id="stBest">–</strong>Bästa (minst)</div>
+        </div>
+      </div>
+    </section>
 
-    <div class="card">
-      <h3>Statistik</h3>
-      <div class="kpi">
-        <div class="box"><div>Startade</div><div id="kpiStarted" class="val">0</div></div>
-        <div class="box"><div>Klara</div><div id="kpiCleared" class="val">0</div></div>
-        <div class="box"><div>Snitt misstag</div><div id="kpiAvg" class="val">0</div></div>
-        <div class="box"><div>Bästa (minst)</div><div id="kpiBest" class="val">0</div></div>
+    <!-- ===== SPELSKÄRM ===== -->
+    <section id="screenGame" class="screen">
+      <header class="game">
+        <div class="top-left">
+          <h1>Sudoku <small class="ver" id="verGame"></small> <small class="diff" id="diffInline"></small></h1>
+        </div>
+        <div class="stats">
+          <div>Misstag: <span id="mistakes" class="num">0</span></div>
+          <div>Tomma: <span id="empties" class="num">81</span></div>
+        </div>
+        <div class="top-right">
+          <button id="btnHome" class="btn">Hem</button>
+          <button id="btnCheck" class="btn">Kontrollera</button>
+          <button id="btnSettings" class="btn icon" title="Inställningar" aria-label="Inställningar">⚙️</button>
+        </div>
+      </header>
+
+      <div class="board-wrap"><div id="board" class="board" aria-live="polite"></div></div>
+
+      <div class="pads">
+        <div class="pad" id="padMain" aria-label="Huvudsiffror"></div>
+        <div class="pad" id="padN1" aria-label="Anteckningar 1"></div>
+        <div class="pad" id="padN2" aria-label="Anteckningar 2"></div>
+      </div>
+
+      <div class="actions">
+        <button id="undo" class="btn" title="Ångra" aria-label="Ångra">↶</button>
+        <button id="redo" class="btn" title="Gör om" aria-label="Gör om">↷</button>
+        <button id="eraseMain" class="btn" title="Radera huvud" aria-label="Radera huvud">⌫</button>
+        <button id="eraseN1" class="btn" title="Radera anteckningar 1" aria-label="Radera anteckningar 1">⨯</button>
+        <button id="eraseN2" class="btn" title="Radera anteckningar 2" aria-label="Radera anteckningar 2">⨯</button>
+        <button id="hint" class="btn" title="Hint" aria-label="Hint">💡</button>
+      </div>
+
+      <div class="status" id="status">Välj en ruta.</div>
+    </section>
+  </div>
+
+  <!-- ===== Settings Modal ===== -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="panel">
+      <h2 id="settingsTitle">Inställningar</h2>
+
+      <div class="switch" style="margin:8px 0 12px 0">
+        <label for="themeSelect" style="min-width:80px">Tema</label>
+        <select id="themeSelect">
+          <option value="light">Ljust</option>
+          <option value="dark">Mörkt</option>
+        </select>
+      </div>
+
+      <div class="switch" style="margin:0 0 16px 0">
+        <input type="checkbox" id="liveValidate" />
+        <label for="liveValidate">Validering i realtid (Direkt). Av = endast vid "Kontrollera"</label>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Rutnät</label>
+          <input type="color" id="c-grid" value="#000000">
+          <div id="sw-grid" class="swatches"></div>
+        </div>
+        <div>
+          <label>Förinskrivna siffror</label>
+          <input type="color" id="c-prefill" value="#111111">
+        </div>
+        <div>
+          <label>Huvudsiffror</label>
+          <input type="color" id="c-main" value="#1f5eff">
+        </div>
+        <div>
+          <label>Anteckningar 1</label>
+          <input type="color" id="c-note1" value="#ff0000">
+        </div>
+        <div>
+          <label>Anteckningar 2</label>
+          <input type="color" id="c-note2" value="#2fa568">
+        </div>
+
+        <div>
+          <label>Markerad rad/kolumn/box</label>
+          <input type="color" id="c-hl-selected" value="#e8f0ff">
+          <div id="sw-hl-selected" class="swatches"></div>
+        </div>
+        <div>
+          <label>Samma siffra</label>
+          <input type="color" id="c-hl-same" value="#f3f7ff">
+          <div id="sw-hl-same" class="swatches"></div>
+        </div>
+        <div>
+          <label>Rader/kolumner/boxar för samma siffra</label>
+          <input type="color" id="c-hl-same-rc" value="#eef4ff">
+          <div id="sw-hl-same-rc" class="swatches"></div>
+        </div>
+        <div>
+          <label>Cell med anteckning 1</label>
+          <input type="color" id="c-hl-note1" value="#eef1f6">
+          <div id="sw-hl-note1" class="swatches"></div>
+        </div>
+        <div>
+          <label>Cell med anteckning 2</label>
+          <input type="color" id="c-hl-note2" value="#e9f6ef">
+          <div id="sw-hl-note2" class="swatches"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="closeSettings" class="btn">Stäng</button>
       </div>
     </div>
-  </section>
-</div>
-
-<div id="screen-game" class="wrap hidden">
-  <header class="game">
-    <div class="top-left">
-      <h1>Sudoku <small id="verGame"></small> <small id="diffInline"></small></h1>
-    </div>
-
-    <div class="stats">
-      <div>Misstag: <span id="mistakes" class="num">0</span></div>
-      <div>Tomma: <span id="empties" class="num">81</span></div>
-    </div>
-
-    <div class="top-right">
-      <button id="btnHome" class="btn gray">Hem</button>
-      <button id="btnCheck" class="btn blue">Kontrollera</button>
-      <button id="btnSettings" class="btn icon gray" title="Inställningar" aria-haspopup="dialog" aria-controls="sheet">⚙️</button>
-    </div>
-  </header>
-
-  <div id="board" class="board" role="grid" aria-label="Sudoku-bräde"></div>
-
-  <div class="pad-title">Huvudsiffror</div>
-  <div id="padMain" class="pad" aria-label="Siffror">
-    <!-- 1..9 injected -->
   </div>
 
-  <div class="pad-title">Anteckningar 1</div>
-  <div id="padN1" class="pad"></div>
-
-  <div class="pad-title">Anteckningar 2</div>
-  <div id="padN2" class="pad"></div>
-
-  <div class="actions">
-    <button id="undo" class="btn gray">↶ Ångra</button>
-    <button id="redo" class="btn gray">↷ Gör om</button>
-    <button id="eraseMain" class="btn red">⌫ radera huvud</button>
-    <button id="eraseN1" class="btn red">⨯ radera note1</button>
-    <button id="eraseN2" class="btn red">⨯ radera note2</button>
-    <button id="hint" class="btn green">💡 hint</button>
-  </div>
-</div>
-
-<!-- Settings sheet -->
-<div id="sheet" class="sheet" aria-hidden="true">
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <h2 id="sheetTitle">Inställningar</h2>
-      <button id="closeSheet" class="btn gray">Stäng</button>
-    </div>
-
-    <label for="selTheme">Tema</label>
-    <select id="selTheme" class="btn gray" style="padding-right:28px">
-      <option value="light">Ljust</option>
-      <option value="dark">Mörkt</option>
-      <option value="auto">Följ system</option>
-    </select>
-
-    <div style="margin-top:10px">
-      <label><input id="chkRealtime" type="checkbox"> Validering i realtid (Direkt).</label>
-      <div class="small">Av = endast vid “Kontrollera”.</div>
-    </div>
-
-    <hr>
-
-    <h3>Färger</h3>
-
-    <div class="row mid">
-      <div style="min-width:110px">Rutnät</div>
-      <div id="swGrid" class="swatches"></div>
-    </div>
-
-    <div class="row mid">
-      <div style="min-width:110px">Förinskrivna</div>
-      <input id="colGiven" type="color" value="#000000" class="btn gray" style="width:64px;height:36px;padding:0">
-    </div>
-
-    <div class="row mid">
-      <div style="min-width:110px">Huvudsiffror</div>
-      <input id="colMain" type="color" value="#1d4ed8" class="btn gray" style="width:64px;height:36px;padding:0">
-    </div>
-
-    <div class="row mid">
-      <div style="min-width:110px">Anteckningar 1</div>
-      <input id="colN1" type="color" value="#ff0000" class="btn gray" style="width:64px;height:36px;padding:0">
-    </div>
-
-    <div class="row mid">
-      <div style="min-width:110px">Anteckningar 2</div>
-      <input id="colN2" type="color" value="#16a34a" class="btn gray" style="width:64px;height:36px;padding:0">
-    </div>
-
-    <hr>
-
-    <h3>Bakgrundsmarkeringar</h3>
-    <div class="row mid">
-      <div style="min-width:160px">Markerad rad/kolumn/box</div>
-      <input id="colHLrcb" type="color" value="#e9e9ff" class="btn gray" style="width:64px;height:36px;padding:0">
-    </div>
-    <div class="row mid">
-      <div style="min-width:160px">Samma siffra</div>
-      <input id="colHLsame" type="color" value="#e4e7ff" class="btn gray" style="width:64px;height:36px;padding:0">
+  <!-- ===== Choose Slot Modal ===== -->
+  <div id="chooseModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="chooseTitle">
+    <div class="panel" style="max-width:520px">
+      <h2 id="chooseTitle">Välj plats att använda</h2>
+      <p>Alla platser är upptagna. Välj vilken plats som ska ersättas.</p>
+      <div id="chooseList" style="display:grid;gap:8px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="chooseCancel" class="btn">Avbryt</button>
+      </div>
     </div>
   </div>
-</div>
 
 <script>
-/* =========================
-   Sudoku PWA – index.html
-   ========================= */
-const APP_VERSION = "v. 0.9.2";
-
-/* ---- Storage Keys ---- */
-const KEY_APP   = "sudoku.app.v1";
-const KEY_THEME = "sudoku.theme.v1";
-const KEY_VARS  = "sudoku.themevars.v1";
-
-/* ---- Puzzles (81-chars, 0=tom) ---- */
-const PUZZLES = {
-  easy: [
-"530070000600195000098000060800060003400803001700020006060000280000419005000080079",
-"096040001078006000300900060000050007020400000001000200010060000000302080500010430",
-"700060030010200705000000040000600059300050000060000100000009070800000006047030000"
-  ],
-  medium: [
-"060020000000000003901050040050090007000007090040030080006010004500000000000080600",
-"000060009300000100050400300002030001000902000600040500004007030005000004100050000",
-"008010030002005600600080000000000409900060000000009200020000080007020000000300001"
-  ],
-  hard: [
-"005300000800000020070010500400005300010000040003200001001000068000070000000006200",
-"300000000005009008200005401000020000040810050000090000709400003800500200000000004",
-"000000907020000003003070000600030020010000040040080009000040200700000030304000000"
-  ],
-  master: [
-"000000000000010200070006000600000003008000700900000005000400020007020000000000000",
-"010000000000600000008000340000700000700000006000003000081000900000004000000000050",
-"000048000008000010010000000030000090000502000040000070000000050070000100000920000"
-  ]
-};
-
-/* ---- State ---- */
-const state = {
-  screen: "start",            // or "game"
-  current: null,              // active slot index: 0..2
-  r: 0, c: 0,                 // selection
-  realtime: false,
-  undo: [], redo: [],
-  board: Array(81).fill(0),
-  given: Array(81).fill(false),
-  note1: Array.from({length:81},()=>new Set()),
-  note2: Array.from({length:81},()=>new Set()),
-  mistakes: 0,
-  difficulty: "easy"
-};
-
-/* ---- App Data (slots & stats) ---- */
-function loadApp(){
-  const def = {
-    slots: [
-      {locked:false, data:null},
-      {locked:false, data:null},
-      {locked:false, data:null}
-    ],
-    stats:{started:0, cleared:0, mistakesTotal:0, best:0}
+(()=>{
+  /* ===== Pussel ===== */
+  const APP_VERSION = "v. 0.9.2";
+  const PUZZLES = {
+    easy:   {p:"530070000600195000098000060800060003400803001700020006060000280000419005000080079", s:"534678912672195348198342567859761423426853791713924856961537284287419635345286179"},
+    medium: {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
+    hard:   {p:"300000000005009000200504000000700906000000000607003000000401009000600300000000002", s:"396127845745869231281534697134758926829416573657293418563941279472682359918375462"},
+    master: {p:"000000907000420180000705026100904000050000040000507009920108000034059000507000000", s:"653812947749423185812765326176984253358291746294537819925178634431659872587342691"}
   };
-  let obj;
-  try{ obj = JSON.parse(localStorage.getItem(KEY_APP)||""); }catch{ obj = null; }
-  if(!obj) obj = def;
-  return obj;
-}
-function saveApp(obj){ localStorage.setItem(KEY_APP, JSON.stringify(obj)); }
 
-/* ---- Theme ---- */
-function loadTheme(){
-  const mode = localStorage.getItem(KEY_THEME) || "light";
-  document.getElementById("selTheme").value = mode;
-  applyTheme(mode);
-  const vars = JSON.parse(localStorage.getItem(KEY_VARS)||"{}");
-  setVar("--grid", vars.grid||getComputedStyle(document.documentElement).getPropertyValue("--grid"));
-  document.getElementById("colGiven").value = rgbToHex(getVar("--given")||"#000000");
-  document.getElementById("colMain").value  = rgbToHex(getVar("--main") ||"#1d4ed8");
-  document.getElementById("colN1").value    = rgbToHex(getVar("--note1")||"#ff0000");
-  document.getElementById("colN2").value    = rgbToHex(getVar("--note2")||"#16a34a");
-  document.getElementById("colHLrcb").value = rgbToHex(getVar("--hl-rcb")||"#e9e9ff");
-  document.getElementById("colHLsame").value= rgbToHex(getVar("--hl-same")||"#e4e7ff");
-}
-function applyTheme(mode){
-  const root = document.documentElement;
-  root.dataset.theme = mode;
-  localStorage.setItem(KEY_THEME, mode);
-}
-function setVar(k,v){ if(!v) return; document.documentElement.style.setProperty(k, v); persistVars(); }
-function getVar(k){ return getComputedStyle(document.documentElement).getPropertyValue(k).trim(); }
-function persistVars(){
-  const vars = {
-    grid:getVar("--grid"), given:getVar("--given"), main:getVar("--main"),
-    note1:getVar("--note1"), note2:getVar("--note2"),
-    rcb:getVar("--hl-rcb"), same:getVar("--hl-same")
+  /* ===== DOM ===== */
+  const screenStart = document.getElementById('screenStart');
+  const screenGame  = document.getElementById('screenGame');
+  const slotList = document.getElementById('slotList');
+  const stStarted = document.getElementById('stStarted');
+  const stCompleted = document.getElementById('stCompleted');
+  const stAvg = document.getElementById('stAvg');
+  const stBest = document.getElementById('stBest');
+
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const mistakesEl = document.getElementById('mistakes');
+  const emptiesEl = document.getElementById('empties');
+  const diffTag = document.getElementById('diffInline');
+
+  const buttons = {
+    home: document.getElementById('btnHome'),
+    check: document.getElementById('btnCheck'),
+    undo: document.getElementById('undo'),
+    redo: document.getElementById('redo'),
+    eraseMain: document.getElementById('eraseMain'),
+    eraseN1: document.getElementById('eraseN1'),
+    eraseN2: document.getElementById('eraseN2'),
+    hint: document.getElementById('hint'),
+    settings: document.getElementById('btnSettings'),
   };
-  localStorage.setItem(KEY_VARS, JSON.stringify(vars));
-}
+  const pads = { main: document.getElementById('padMain'), n1: document.getElementById('padN1'), n2: document.getElementById('padN2') };
 
-/* ---- UI Helpers ---- */
-const qs = s=>document.querySelector(s);
-const qsa = s=>Array.from(document.querySelectorAll(s));
-function idx(r,c){ return r*9+c; }
-function rc(i){ return [Math.floor(i/9), i%9]; }
-function inBox(r,c){ return {br:Math.floor(r/3), bc:Math.floor(c/3)}; }
-function clearChildren(el){ while(el.firstChild) el.removeChild(el.firstChild); }
+  // visa version i rubrikerna
+  document.querySelectorAll('.ver').forEach(el=> el.textContent = APP_VERSION);
 
-/* ---- Screens ---- */
-function showStart(){
-  state.screen="start";
-  qs("#screen-start").classList.remove("hidden");
-  qs("#screen-game").classList.add("hidden");
-  renderSlots();
-  renderKPI();
-}
-function showGame(){
-  state.screen="game";
-  qs("#screen-start").classList.add("hidden");
-  qs("#screen-game").classList.remove("hidden");
-}
+  const modal = document.getElementById('modal');
+  const chooseModal = document.getElementById('chooseModal');
+  const chooseList = document.getElementById('chooseList');
+  const chooseCancel = document.getElementById('chooseCancel');
+  const appRoot = document.getElementById('appRoot');
+  const themeSelect = document.getElementById('themeSelect');
+  const liveValidateChk = document.getElementById('liveValidate');
 
-/* ---- Build Start Screen ---- */
-function renderSlots(){
-  const app = loadApp();
-  const wrap = qs("#slots"); clearChildren(wrap);
-  app.slots.forEach((s,i)=>{
-    const div = document.createElement("div"); div.className="slot";
-    const left = document.createElement("div");
-    left.innerHTML = s.data
-      ? `<b>Plats ${i+1}</b> — ${labelDiff(s.data.difficulty)} • ${s.data.empties??countEmpties(s.data.board)} tomma`
-      : `<b>Plats ${i+1}</b> <span class="small">tom</span>`;
-    const right = document.createElement("div"); right.className="row";
-    const btnC = document.createElement("button"); btnC.className="btn"; btnC.textContent="Fortsätt";
-    btnC.disabled = !s.data; btnC.onclick=()=>{ loadSlot(i); };
-    const btnL = document.createElement("button"); btnL.className="btn gray"; btnL.textContent= s.locked? "Låst" : "Lås";
-    btnL.onclick=()=>{ toggleLock(i); };
-    const btnR = document.createElement("button"); btnR.className="btn red"; btnR.textContent="Radera";
-    btnR.onclick=()=>{ removeSlot(i); };
-    right.append(btnC, btnL, btnR);
-    div.append(left, right);
-    wrap.appendChild(div);
-  });
-}
-function renderKPI(){
-  const {stats} = loadApp();
-  qs("#kpiStarted").textContent = stats.started;
-  qs("#kpiCleared").textContent = stats.cleared;
-  qs("#kpiAvg").textContent = stats.cleared ? Math.round((stats.mistakesTotal/stats.cleared)*10)/10 : 0;
-  qs("#kpiBest").textContent = stats.best || 0;
-}
-
-/* ---- New / Load / Save ---- */
-function labelDiff(d){ return {easy:"Lätt",medium:"Medel",hard:"Svår",master:"Mästare"}[d]||d; }
-
-function newGame(diff){
-  const puzzle = pickRandom(PUZZLES[diff]);
-  const arr = puzzle.split("").map(x=>+x);
-  state.board = arr.slice();
-  state.given = arr.map(v=>v!==0);
-  state.note1 = Array.from({length:81},()=>new Set());
-  state.note2 = Array.from({length:81},()=>new Set());
-  state.undo=[]; state.redo=[];
-  state.mistakes=0; state.difficulty=diff;
-  state.r=0; state.c=0;
-
-  const app = loadApp();
-  const slotIdx = findWritableSlot(app);
-  app.slots[slotIdx].data = serializeState();
-  app.stats.started++;
-  saveApp(app);
-  state.current = slotIdx;
-  renderGameUI();
-  showGame();
-  focusCell(0,0);
-}
-
-function loadSlot(i){
-  const app = loadApp();
-  const s = app.slots[i].data; if(!s) return;
-  applySerialized(s);
-  state.current = i;
-  renderGameUI();
-  showGame();
-  focusCell(state.r, state.c);
-}
-
-function removeSlot(i){
-  const app = loadApp();
-  app.slots[i].data=null; app.slots[i].locked=false;
-  saveApp(app); renderSlots();
-}
-
-function toggleLock(i){
-  const app = loadApp();
-  const lockedCount = app.slots.filter(s=>s.locked).length;
-  if(!app.slots[i].locked && lockedCount>=2){ alert("Max två låsta."); return; }
-  app.slots[i].locked = !app.slots[i].locked;
-  saveApp(app); renderSlots();
-}
-
-function findWritableSlot(app){
-  // Prefer empty; else a non-locked oldest (slot order = simple priority)
-  for(let i=0;i<3;i++) if(!app.slots[i].data && !app.slots[i].locked) return i;
-  for(let i=0;i<3;i++) if(!app.slots[i].locked) return i;
-  // If all locked, override slot 1
-  return 0;
-}
-
-function autosave(){
-  if(state.current==null) return;
-  const app = loadApp();
-  app.slots[state.current].data = serializeState();
-  saveApp(app);
-  updateHUD();
-}
-
-function serializeState(){
-  return {
-    board: state.board, given: state.given,
-    n1: state.note1.map(s=>[...s]), n2: state.note2.map(s=>[...s]),
-    undo: state.undo, redo: state.redo,
-    r: state.r, c: state.c, mistakes: state.mistakes,
-    difficulty: state.difficulty,
-    empties: countEmpties(state.board)
+  const colorInputs = {
+    '--grid':'c-grid', '--prefill':'c-prefill', '--main':'c-main', '--note1':'c-note1', '--note2':'c-note2',
+    '--hl-selected':'c-hl-selected', '--hl-same':'c-hl-same', '--hl-same-rc':'c-hl-same-rc', '--hl-note1-match':'c-hl-note1', '--hl-note2-match':'c-hl-note2'
   };
-}
-function applySerialized(s){
-  state.board = s.board.slice();
-  state.given = s.given.slice();
-  state.note1 = s.n1.map(a=>new Set(a));
-  state.note2 = s.n2.map(a=>new Set(a));
-  state.undo = s.undo||[];
-  state.redo = s.redo||[];
-  state.r = s.r||0; state.c=s.c||0;
-  state.mistakes = s.mistakes||0;
-  state.difficulty = s.difficulty||"easy";
-}
 
-/* ---- Game UI ---- */
-function renderGameUI(){
-  // header
-  qs("#verGame").textContent = APP_VERSION;
-  qs("#diffInline").textContent = "– Svårighet: "+labelDiff(state.difficulty);
-  // board
-  const b = qs("#board"); clearChildren(b);
-  for(let r=0;r<9;r++){
-    for(let c=0;c<9;c++){
-      const i = idx(r,c);
-      const btn = document.createElement("button");
-      btn.className="cell";
-      btn.type="button";
-      btn.setAttribute("role","gridcell");
-      btn.setAttribute("aria-label",`Rad ${r+1}, Kolumn ${c+1}`);
-      btn.dataset.r = r%3===2?2:r%3===1?1:0; // for thick lines
-      btn.dataset.c = c%3===2?2:c%3===1?1:0;
-      btn.tabIndex=0;
-      if(state.given[i]) btn.classList.add("given");
-      btn.addEventListener("click",()=>{ selectCell(r,c); });
-      btn.addEventListener("keydown",cellKeydown);
-      b.appendChild(btn);
-    }
+  /* ===== Storage ===== */
+  const LS_THEME = 'sudoku.theme.v1';
+  const LS_THEMEVARS = 'sudoku.themevars.v1';
+  const LS_APP   = 'sudoku.app.v1';
+
+  function nowTs(){ const d=new Date(); const p=n=> String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+  function labelForDiff(d){ return ({easy:'Lätt',medium:'Medel',hard:'Svår',master:'Mästare'})[d]||d; }
+
+  let store = loadApp();
+  let currentSlot = null; // 0..2 eller null
+
+  function defaultStats(){ return { started:0, completed:0, totalMistakes:0, bestMistakes:null }; }
+  function defaultSlots(){ return [null,null,null].map(()=> ({ locked:false, savedAt:null, difficulty:null, state:null })); }
+  function loadApp(){
+    try{
+      const raw=localStorage.getItem(LS_APP); if(!raw) return { slots: defaultSlots(), stats: defaultStats() };
+      const obj=JSON.parse(raw);
+      if(!obj.slots) obj.slots=defaultSlots();
+      if(!obj.stats) obj.stats=defaultStats();
+      return obj;
+    }catch{ return { slots: defaultSlots(), stats: defaultStats() }; }
   }
-  drawBoard();
-  // pads
-  buildPad(qs("#padMain"),"main");
-  buildPad(qs("#padN1"),"n1");
-  buildPad(qs("#padN2"),"n2");
-  // header numbers
-  updateHUD();
-}
+  function saveApp(){ localStorage.setItem(LS_APP, JSON.stringify(store)); }
 
-function buildPad(el,mode){
-  clearChildren(el);
-  for(let n=1;n<=9;n++){
-    const k = document.createElement("button");
-    k.type="button"; k.className="key"+(mode==="n1"?" red":mode==="n2"?" green":"");
-    k.textContent = n;
-    k.addEventListener("click",()=> onNum(n,mode));
-    el.appendChild(k);
-  }
-}
+  /* ===== Spel-state ===== */
+  let state = {
+    difficulty:'easy',
+    puzzle:"", solution:"", fixed:new Set(),
+    main:Array(81).fill('0'), n1:Array(81).fill(0), n2:Array(81).fill(0),
+    sel:null, mistakes:0, live:false, history:[], redo:[]
+  };
 
-function updateHUD(){
-  qs("#verStart").textContent = APP_VERSION;
-  qs("#mistakes").textContent = state.mistakes;
-  qs("#empties").textContent = countEmpties(state.board);
-}
+  /* ===== Helpers ===== */
+  const id = (r,c)=> r*9+c; const rOf = i=> Math.floor(i/9); const cOf=i=> i%9; const boxOf=(r,c)=> Math.floor(r/3)*3+Math.floor(c/3); const bit=n=>1<<(n-1);
+  function setStatus(msg){ statusEl.textContent=msg||''; }
+  function updateStatsUI(){ stStarted.textContent=store.stats.started; stCompleted.textContent=store.stats.completed; stAvg.textContent = store.stats.completed? (Math.round((store.stats.totalMistakes/store.stats.completed)*10)/10) : 0; stBest.textContent = store.stats.bestMistakes==null? '–' : String(store.stats.bestMistakes); }
 
-/* ---- Board drawing & highlights ---- */
-function drawBoard(){
-  const cells = qsa(".cell");
-  cells.forEach((cell,i)=>{
-    cell.classList.remove("main","selected","rcb","same","error");
-    const v = state.board[i];
-    cell.textContent = v? v : "";
-    if(!state.given[i] && v) cell.classList.add("main");
+  /* ===== Startskärm ===== */
+  function renderSlots(){
+    slotList.innerHTML='';
+    const lockedCount = store.slots.filter(s=> s && s.locked).length;
+    store.slots.forEach((slot, idx)=>{
+      const row=document.createElement('div'); row.className='slot';
+      const title=document.createElement('div');
+      const meta=`${slot && slot.state? labelForDiff(slot.difficulty):'tom'}${slot && slot.savedAt? ' · '+slot.savedAt:''}`;
+      title.innerHTML=`<strong>Plats ${idx+1}</strong><div class="meta">${meta}</div>`;
 
-    // Notes
-    const n1 = state.note1[i], n2 = state.note2[i];
-    cell.querySelector(".note1")?.remove();
-    cell.querySelector(".note2")?.remove();
-    if(!v && n1.size){
-      const box=document.createElement("div"); box.className="note1";
-      for(let k=1;k<=9;k++){ const d=document.createElement("div"); d.className="n"; d.textContent=n1.has(k)?k:""; box.appendChild(d); }
-      cell.appendChild(box);
-    }
-    if(!v && n2.size){
-      const box=document.createElement("div"); box.className="note2";
-      for(let k=1;k<=9;k++){ const d=document.createElement("div"); d.className="n"; d.textContent=n2.has(k)?k:""; box.appendChild(d); }
-      cell.appendChild(box);
-    }
-  });
-  applyHighlights();
-  if(state.realtime) validateConflicts();
-}
+      const btnCont=document.createElement('button'); btnCont.className='btn'; btnCont.textContent='Fortsätt'; btnCont.disabled = !(slot && slot.state);
+      btnCont.addEventListener('click',()=>{ if(!(slot && slot.state)) return; loadSlotToGame(idx); });
 
-function applyHighlights(){
-  const i = idx(state.r,state.c);
-  const cells = qsa(".cell");
-  cells.forEach(c=>c.classList.remove("selected","rcb","same"));
-  const sameVal = state.board[i]||0;
-  for(let r=0;r<9;r++){
-    for(let c=0;c<9;c++){
-      const j = idx(r,c);
-      const el = cells[j];
-      if(r===state.r || c===state.c || (Math.floor(r/3)===Math.floor(state.r/3) && Math.floor(c/3)===Math.floor(state.c/3))){
-        el.classList.add("rcb");
-      }
-      if(j===i){ el.classList.add("selected"); }
-      if(sameVal && state.board[j]===sameVal) el.classList.add("same");
-    }
-  }
-}
+      const btnLock=document.createElement('button'); btnLock.className='btn'; btnLock.textContent = slot?.locked? 'Låst' : 'Lås';
+      btnLock.disabled = slot?.locked? false : (lockedCount>=2); // max 2 låsta totalt
+      btnLock.addEventListener('click',()=>{ slot.locked = !slot.locked; saveApp(); renderSlots(); });
 
-/* ---- Selection & Keyboard ---- */
-function selectCell(r,c){ state.r=r; state.c=c; drawBoard(); focusCell(r,c); }
-function focusCell(r,c){
-  const i = idx(r,c);
-  const cell = qsa(".cell")[i];
-  if(cell) cell.focus({preventScroll:false});
-}
-function cellKeydown(e){
-  const {key} = e;
-  if(key>="1" && key<="9"){ e.preventDefault(); onNum(+key,"main"); return; }
-  if(key==="Backspace" || key==="Delete"){ e.preventDefault(); erase("main"); return; }
-  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(key)){
-    e.preventDefault();
-    let {r,c} = state;
-    if(key==="ArrowUp") r = (r+8)%9;
-    if(key==="ArrowDown") r = (r+1)%9;
-    if(key==="ArrowLeft") c = (c+8)%9;
-    if(key==="ArrowRight") c = (c+1)%9;
-    selectCell(r,c);
-  }
-}
+      const btnDel=document.createElement('button'); btnDel.className='btn'; btnDel.textContent='Radera'; btnDel.disabled = !(slot && slot.state) || slot?.locked;
+      btnDel.addEventListener('click',()=>{ if(slot?.locked) return; if(confirm(`Radera Plats ${idx+1}?`)){ store.slots[idx] = { locked: slot?.locked||false, savedAt:null, difficulty:null, state:null }; saveApp(); renderSlots(); }});
 
-/* ---- Input handling ---- */
-function onNum(n,mode){
-  const i = idx(state.r,state.c);
-  if(state.given[i]) return;
-
-  if(mode==="main"){
-    const prev = state.board[i];
-    if(prev===n) return; // no-op
-    pushUndo({t:"set",i,prev,val:n});
-    state.board[i]=n;
-    // candidate clearing in peers
-    removeCandidatePeers(state.r,state.c,n);
-    drawBoard();
-    autosave();
-  }else if(mode==="n1" || mode==="n2"){
-    if(state.board[i]) return; // don't add notes in filled
-    const set = mode==="n1" ? state.note1[i] : state.note2[i];
-    const had = set.has(n);
-    pushUndo({t:"note",mode,i,n,prev:had});
-    if(had) set.delete(n); else set.add(n);
-    drawBoard(); autosave();
-  }
-}
-
-function erase(which){
-  const i = idx(state.r,state.c);
-  if(which==="main"){
-    if(state.given[i]) return;
-    const prev = state.board[i]; if(!prev) return;
-    pushUndo({t:"set",i,prev,val:0});
-    state.board[i]=0;
-  }else if(which==="n1" || which==="n2"){
-    const set = which==="n1"? state.note1[i] : state.note2[i];
-    if(!set.size) return;
-    pushUndo({t:"wipeNote",mode:which,i,prev:[...set]});
-    set.clear();
-  }
-  drawBoard(); autosave();
-}
-
-function removeCandidatePeers(r,c,n){
-  for(let k=0;k<9;k++){
-    const i1 = idx(r,k); state.note1[i1]?.delete(n); state.note2[i1]?.delete(n);
-    const i2 = idx(k,c); state.note1[i2]?.delete(n); state.note2[i2]?.delete(n);
-  }
-  const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
-  for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++){
-    const i = idx(br+rr, bc+cc);
-    state.note1[i]?.delete(n); state.note2[i]?.delete(n);
-  }
-}
-
-/* ---- Undo / Redo ---- */
-function pushUndo(act){ state.undo.push(act); state.redo.length=0; }
-function doUndo(){
-  const act = state.undo.pop(); if(!act) return;
-  state.redo.push(act);
-  if(act.t==="set"){ state.board[act.i]=act.prev; }
-  if(act.t==="note"){ const set = act.mode==="n1"? state.note1[act.i] : state.note2[act.i]; if(act.prev) set.add(act.n); else set.delete(act.n); }
-  if(act.t==="wipeNote"){ const set = act.mode==="n1"? state.note1[act.i] : state.note2[act.i]; set.clear(); act.prev.forEach(v=>set.add(v)); }
-  drawBoard(); autosave();
-}
-function doRedo(){
-  const act = state.redo.pop(); if(!act) return;
-  state.undo.push(act);
-  if(act.t==="set"){ state.board[act.i]=act.val; }
-  if(act.t==="note"){ const set = act.mode==="n1"? state.note1[act.i] : state.note2[act.i]; if(act.prev) set.delete(act.n); else set.add(act.n); }
-  if(act.t==="wipeNote"){ const set = act.mode==="n1"? state.note1[act.i] : state.note2[act.i]; set.clear(); }
-  drawBoard(); autosave();
-}
-
-/* ---- Validation & Hint ---- */
-function validateConflicts(){
-  const cells = qsa(".cell");
-  cells.forEach(c=>c.classList.remove("error"));
-  // mark duplicates in row / col / box
-  for(let r=0;r<9;r++){
-    markDupGroup([...Array(9)].map((_,c)=>idx(r,c)));
-  }
-  for(let c=0;c<9;c++){
-    markDupGroup([...Array(9)].map((_,r)=>idx(r,c)));
-  }
-  for(let br=0;br<3;br++) for(let bc=0;bc<3;bc++){
-    const arr=[]; for(let r=0;r<3;r++) for(let c=0;c<3;c++) arr.push(idx(br*3+r,bc*3+c));
-    markDupGroup(arr);
-  }
-  function markDupGroup(indexes){
-    const seen = {};
-    indexes.forEach(i=>{
-      const v=state.board[i];
-      if(!v) return;
-      if(!seen[v]) seen[v]=[];
-      seen[v].push(i);
-    });
-    Object.values(seen).forEach(list=>{
-      if(list.length>1){
-        list.forEach(i=> qsa(".cell")[i].classList.add("error"));
-      }
+      row.append(title, btnCont, btnLock, btnDel);
+      slotList.appendChild(row);
     });
   }
-}
-function onCheck(){
-  const before = document.querySelectorAll(".cell.error").length;
-  validateConflicts();
-  const after = document.querySelectorAll(".cell.error").length;
-  if(after>0) state.mistakes++;
-  drawBoard(); autosave();
-  checkSolved();
-}
 
-function checkSolved(){
-  if(countEmpties(state.board)!==0) return false;
-  // simple legality check
-  const ok = isLegal(state.board);
-  if(ok){
-    const app = loadApp();
-    app.stats.cleared++;
-    app.stats.mistakesTotal += state.mistakes;
-    app.stats.best = app.stats.best? Math.min(app.stats.best, state.mistakes) : state.mistakes;
-    saveApp(app);
-    alert("Grattis! Du löste sudokut 🎉");
-    showStart();
-  }
-  return ok;
-}
+  document.querySelectorAll('[data-new]').forEach(btn=> btn.addEventListener('click',()=>startNewFlow(btn.getAttribute('data-new'))));
 
-function isLegal(b){
-  // rows
-  for(let r=0;r<9;r++){
-    const set=new Set();
-    for(let c=0;c<9;c++){ const v=b[idx(r,c)]; if(v<1||v>9||set.has(v)) return false; set.add(v); }
+  function startNewFlow(diff){
+    // Finns ledig (olåst & tom) ?
+    const freeIndex = store.slots.findIndex(s=> !s?.locked && !s?.state);
+    if(freeIndex>-1){ startNewGame(diff, freeIndex); return; }
+    // Om alla fulla/låsta → välj slot (låsta döljs)
+    openChooseSlot(diff);
   }
-  // cols
-  for(let c=0;c<9;c++){
-    const set=new Set();
-    for(let r=0;r<9;r++){ const v=b[idx(r,c)]; if(v<1||v>9||set.has(v)) return false; set.add(v); }
+
+  function openChooseSlot(diff){
+    chooseList.innerHTML='';
+    store.slots.forEach((slot, idx)=>{
+      if(slot.locked) return; // visa inte låsta
+      const row=document.createElement('div'); row.className='slot';
+      row.innerHTML=`<div><strong>Plats ${idx+1}</strong><div class="meta">${labelForDiff(slot.difficulty||'–')} · ${slot.savedAt||''}</div></div>`;
+      const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Använd';
+      btn.addEventListener('click',()=>{ closeChoose(); startNewGame(diff, idx); });
+      row.appendChild(btn); chooseList.appendChild(row);
+    });
+    chooseCancel.onclick=closeChoose; openChoose();
   }
-  // boxes
-  for(let br=0;br<3;br++) for(let bc=0;bc<3;bc++){
-    const set=new Set();
-    for(let r=0;r<3;r++) for(let c=0;c<3;c++){
-      const v=b[idx(br*3+r, bc*3+c)]; if(v<1||v>9||set.has(v)) return false; set.add(v);
+  function openChoose(){ chooseModal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> chooseList.querySelector('button')?.focus(),0); }
+  function closeChoose(){ chooseModal.classList.remove('open'); appRoot.removeAttribute('inert'); }
+
+  function loadSlotToGame(idx){
+    const slot = store.slots[idx]; if(!slot || !slot.state) return;
+    currentSlot = idx;
+    const s = slot.state;
+    state = { ...state, difficulty:slot.difficulty, puzzle:s.puzzle, solution:s.solution, fixed:new Set(s.fixed||[]), main:s.main, n1:s.n1, n2:s.n2, sel:s.sel||null, mistakes:s.mistakes||0, live:s.live??false, history:[], redo:[] };
+    showGame(); renderBoard(); mistakesEl.textContent=String(state.mistakes); diffTag.textContent = 'Svårighet: ' + labelForDiff(state.difficulty); refreshHighlights(); setStatus('Återupptaget.'); updateEmpties();
+  }
+
+  function startNewGame(diff, slotIndex){
+    const p = PUZZLES[diff];
+    state = { difficulty:diff, puzzle:p.p, solution:p.s, fixed:new Set(), main:Array(81).fill('0'), n1:Array(81).fill(0), n2:Array(81).fill(0), sel:null, mistakes:0, live:liveValidateChk.checked, history:[], redo:[] };
+    for(let i=0;i<81;i++) if(p.p[i]!== '0') state.fixed.add(i);
+    currentSlot = slotIndex;
+    // stats
+    store.stats.started += 1; saveApp(); updateStatsUI();
+    saveActive();
+    showGame(); renderBoard(); mistakesEl.textContent='0'; diffTag.textContent = 'Svårighet: ' + labelForDiff(diff); setStatus('Välj en ruta.'); updateEmpties();
+  }
+
+  function saveActive(){
+    if(currentSlot==null) return;
+    const snapshot = { puzzle:state.puzzle, solution:state.solution, main:state.main, n1:state.n1, n2:state.n2, fixed:[...state.fixed], mistakes:state.mistakes, live:state.live, sel:state.sel };
+    store.slots[currentSlot] = { locked: store.slots[currentSlot]?.locked||false, savedAt: nowTs(), difficulty: state.difficulty, state: snapshot };
+    saveApp(); renderSlots();
+  }
+
+  function showStart(){ screenGame.classList.remove('active'); screenStart.classList.add('active'); renderSlots(); updateStatsUI(); }
+  function showGame(){ screenStart.classList.remove('active'); screenGame.classList.add('active'); }
+
+  buttons.home.addEventListener('click', showStart);
+
+  /* ===== Bräde & UI ===== */
+  function clearBoard(){ boardEl.innerHTML=''; }
+  function renderBoard(){
+    clearBoard();
+    for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+      const i=id(r,c);
+      const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i;
+      const input=document.createElement('input'); input.setAttribute('inputmode','none'); input.setAttribute('readonly',''); input.setAttribute('tabindex','-1'); input.setAttribute('maxlength','1'); input.setAttribute('aria-label',`Rad ${r+1}, Kolumn ${c+1}`);
+      if(state.puzzle[i] !== '0'){ input.value=state.puzzle[i]; cell.classList.add('readonly'); state.fixed.add(i); }
+      else if(state.main[i] !== '0'){ input.value = state.main[i]; }
+      cell.appendChild(input);
+      const notes=document.createElement('div'); notes.className='notes';
+      for(let n=1;n<=9;n++){ const s=document.createElement('div'); s.className='n'+( (state.n2[i] & bit(n))? ' g':'' ); s.dataset.n=String(n); s.textContent = (state.n1[i] & bit(n)) || (state.n2[i] & bit(n)) ? n : ''; notes.appendChild(s); }
+      cell.appendChild(notes);
+      boardEl.appendChild(cell);
     }
+    attachCellHandlers(); refreshNumbersDisabled(); updateEmpties();
   }
-  return true;
-}
-
-function candidatesAt(r,c){
-  if(state.board[idx(r,c)]) return [];
-  const taken=new Set();
-  for(let k=0;k<9;k++){ taken.add(state.board[idx(r,k)]); taken.add(state.board[idx(k,c)]); }
-  const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
-  for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++) taken.add(state.board[idx(br+rr,bc+cc)]);
-  const res=[]; for(let n=1;n<=9;n++) if(!taken.has(n)) res.push(n);
-  return res;
-}
-function onHint(){
-  // Find any naked single
-  for(let r=0;r<9;r++){
-    for(let c=0;c<9;c++){
-      const i=idx(r,c); if(state.board[i]) continue;
-      const cands = candidatesAt(r,c);
-      if(cands.length===1){
-        selectCell(r,c);
-        onNum(cands[0],"main");
-        return;
+  function updateEmpties(){ let count=0; for(let i=0;i<81;i++){ if(state.puzzle[i]==='0' && state.main[i]==='0') count++; } emptiesEl.textContent=String(count); }
+  function attachCellHandlers(){
+    boardEl.querySelectorAll('.cell').forEach(cell=>{
+      cell.addEventListener('click',()=> selectCell(cell));
+    });
+  }
+  function selectCell(cell){ state.sel = +cell.dataset.i; refreshHighlights(); }
+  function refreshHighlights(){
+    Array.from(boardEl.children).forEach(c=> c.classList.remove('selected','related','sameNum','sameNumRC','noteMatch1','noteMatch2','error'));
+    if(state.sel==null) return; const r=rOf(state.sel), c=cOf(state.sel);
+    for(let i=0;i<81;i++){
+      const rr=rOf(i), cc=cOf(i); const el=boardEl.children[i];
+      if(i===state.sel) el.classList.add('selected');
+      if(rr===r || cc===c || boxOf(rr,cc)===boxOf(r,c)) el.classList.add('related');
+    }
+    const v = valueAtIndex(state.sel);
+    if(v!=='0'){
+      for(let i=0;i<81;i++) if(valueAtIndex(i)===v){
+        const el=boardEl.children[i]; el.classList.add('sameNum');
+        const rr=rOf(i), cc=cOf(i), bb=boxOf(rr,cc);
+        for(let j=0;j<81;j++){
+          if(rOf(j)===rr || cOf(j)===cc || boxOf(rOf(j),cOf(j))===bb){
+            boardEl.children[j].classList.add('sameNumRC');
+          }
+        }
+      }
+      for(let i=0;i<81;i++){
+        const has1=(state.n1[i]&bit(+v))!==0; const has2=(state.n2[i]&bit(+v))!==0; if(has1) boardEl.children[i].classList.add('noteMatch1'); if(has2) boardEl.children[i].classList.add('noteMatch2');
       }
     }
+    for(let i=0;i<81;i++){
+      const el=boardEl.children[i]; const v=valueAtIndex(i);
+      if(state.live && v!=='0' && !state.fixed.has(i) && v!==state.solution[i]) el.classList.add('error');
+    }
   }
-  alert("Inga enkla tips just nu (naked single).");
-}
+    
+  function valueAtIndex(i){ if(state.puzzle[i] !== '0') return state.puzzle[i]; return state.main[i] || '0'; }
 
-/* ---- Utils ---- */
-function countEmpties(b){ let n=0; for(const v of b) if(!v) n++; return n; }
-function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function rgbToHex(rgb){
-  if(!rgb) return "#000000";
-  if(rgb[0]==="#") return rgb;
-  const m = rgb.match(/\d+/g)||[0,0,0];
-  return "#"+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,"0")).join("");
-}
+  /* ===== Actions & Undo/Redo ===== */
+  function makeSetMainAction(i, val){
+    const before = state.main[i]; const a={type:'setMain', i, before, after:val, cleared1:[], cleared2:[]};
+    if(val!=='0'){ const n=+val; const r=rOf(i), c=cOf(i), b=boxOf(r,c); for(let j=0;j<81;j++){ if(j===i) continue; const rr=rOf(j), cc=cOf(j); if(rr===r||cc===c||boxOf(rr,cc)===b){ if(state.n1[j]&bit(n)) a.cleared1.push(j); if(state.n2[j]&bit(n)) a.cleared2.push(j); } } }
+    return a;
+  }
+  function makeClearMainKeepNotesAction(i){ return {type:'clearMainKeepNotes', i, before:state.main[i]}; }
+  function makeToggleNoteAction(i, n, layer){ const before1=state.n1[i], before2=state.n2[i]; return {type:'toggleNote', i, n, layer, before1, before2}; }
+  function makeSetNotesMaskAction(i, layer, mask){ return {type:'setNotesMask', i, layer, before: layer===1? state.n1[i]:state.n2[i], after:mask}; }
+  function performAction(a){ state.history.push(a); state.redo.length=0; doAction(a); }
+  function undo(){ const a=state.history.pop(); if(!a) return; state.redo.push(a); undoAction(a); }
+  function redo(){ const a=state.redo.pop(); if(!a) return; state.history.push(a); doAction(a); }
 
-/* ---- Event Wiring ---- */
-function wire(){
-  // Start screen
-  qsa('[data-new]').forEach(b=> b.addEventListener('click',()=> newGame(b.dataset.new)));
-  // Game header
-  qs("#btnHome").addEventListener("click",showStart);
-  qs("#btnCheck").addEventListener("click",onCheck);
-  qs("#btnSettings").addEventListener("click",()=> openSheet(true));
-  // Actions
-  qs("#undo").addEventListener("click",doUndo);
-  qs("#redo").addEventListener("click",doRedo);
-  qs("#eraseMain").addEventListener("click",()=>erase("main"));
-  qs("#eraseN1").addEventListener("click",()=>erase("n1"));
-  qs("#eraseN2").addEventListener("click",()=>erase("n2"));
-  qs("#hint").addEventListener("click",onHint);
+  function doAction(a){
+    switch(a.type){
+      case 'setMain':{
+        setMain(a.i, a.after);
+        if(a.after!=='0'){ const n=+a.after; a.cleared1.forEach(j=>{ state.n1[j]&=~bit(n); renderNotesCell(j); }); a.cleared2.forEach(j=>{ state.n2[j]&=~bit(n); renderNotesCell(j); }); }
+        break; }
+      case 'clearMainKeepNotes': setMainKeepNotes(a.i); break;
+      case 'toggleNote': toggleNote(a.i,a.n,a.layer); break;
+      case 'setNotesMask': setNotesMask(a.i,a.layer,a.after); break;
+    }
+  }
+  function undoAction(a){
+    switch(a.type){
+      case 'setMain':{
+        setMain(a.i, a.before);
+        if(a.after!=='0'){ const n=+a.after; a.cleared1.forEach(j=>{ state.n1[j]|=bit(n); renderNotesCell(j); }); a.cleared2.forEach(j=>{ state.n2[j]|=bit(n); renderNotesCell(j); }); }
+        break; }
+      case 'clearMainKeepNotes': setMain(a.i, a.before); break;
+      case 'toggleNote':{ state.n1[a.i]=a.before1; state.n2[a.i]=a.before2; renderNotesCell(a.i); saveActive(); refreshHighlights(); break; }
+      case 'setNotesMask': setNotesMask(a.i,a.layer,a.before); break;
+    }
+  }
 
-  // Settings
-  qs("#closeSheet").addEventListener("click",()=> openSheet(false));
-  qs("#selTheme").addEventListener("change",e=> applyTheme(e.target.value));
-  qs("#chkRealtime").addEventListener("change",e=> {state.realtime=e.target.checked; drawBoard(); autosave();});
+  function setMain(i,v){ if(state.fixed.has(i)) return; state.main[i]=v; const input=boardEl.children[i].querySelector('input'); input.value = v==='0'? '' : v; if(v!=='0'){ state.n1[i]=0; state.n2[i]=0; if(state.live && v!==state.solution[i]){ state.mistakes++; mistakesEl.textContent=String(state.mistakes); boardEl.children[i].classList.add('error'); } } renderNotesCell(i); refreshHighlights(); refreshNumbersDisabled(); updateEmpties(); saveActive(); if(isSolved()) onSolved(); }
+  function setMainKeepNotes(i){ if(state.fixed.has(i)) return; state.main[i]='0'; const input=boardEl.children[i].querySelector('input'); input.value=''; renderNotesCell(i); refreshHighlights(); refreshNumbersDisabled(); updateEmpties(); saveActive(); }
+  function renderNotesCell(i){ const notes=boardEl.children[i].querySelector('.notes').children; for(let n=1;n<=9;n++){ const on1=(state.n1[i]&bit(n))!==0; const on2=(state.n2[i]&bit(n))!==0; const el=notes[n-1]; el.textContent = (on1||on2)? n:''; el.classList.toggle('g', on2); } }
+  function setNotesMask(i,layer,mask){ if(state.fixed.has(i)) return; if(layer===1) state.n1[i]=mask; else state.n2[i]=mask; renderNotesCell(i); saveActive(); refreshHighlights(); }
+  function toggleNote(i,n,layer){
+    if(state.fixed.has(i)) return; // givna får aldrig notes
+    if(state.main[i] !== '0') return; // blockera anteckningar när huvudsiffra finns
+    const m=bit(n);
+    if(layer===1){ state.n1[i]^=m; state.n2[i]&=~m; }
+    else { state.n2[i]^=m; state.n1[i]&=~m; }
+    renderNotesCell(i); saveActive(); refreshHighlights();
+  }
+  function refreshNumbersDisabled(){ const counts=Array(10).fill(0); for(let i=0;i<81;i++){ const v=valueAtIndex(i); if(v!=='0') counts[+v]++; } for(let n=1;n<=9;n++){ pads.main.querySelector(`[data-n='${n}']`).classList.toggle('disabled', counts[n]===9); } }
 
-  // Color inputs
-  qs("#colGiven").addEventListener("input",e=> setVar("--given", e.target.value));
-  qs("#colMain").addEventListener("input",e=> setVar("--main", e.target.value));
-  qs("#colN1").addEventListener("input",e=> setVar("--note1", e.target.value));
-  qs("#colN2").addEventListener("input",e=> setVar("--note2", e.target.value));
-  qs("#colHLrcb").addEventListener("input",e=> setVar("--hl-rcb", e.target.value));
-  qs("#colHLsame").addEventListener("input",e=> setVar("--hl-same", e.target.value));
+  function checkBoard(){ let wrong=0; for(let i=0;i<81;i++){ const el=boardEl.children[i]; el.classList.remove('error'); const v=valueAtIndex(i); if(v!=='0' && !state.fixed.has(i) && v!==state.solution[i]){ wrong++; el.classList.add('error'); } } if(wrong>0){ state.mistakes+=wrong; mistakesEl.textContent=String(state.mistakes); setStatus(`Hittade ${wrong} fel (markerade).`); } else setStatus('Inga fel hittade.'); saveActive(); }
 
-  // Grid swatches
-  const sw = qs("#swGrid");
-  const greys = ["#000000","#1f2937","#374151","#6b7280","#9ca3af","#cbd5e1","#e5e7eb","#ffffff"];
-  greys.forEach(col=>{
-    const s=document.createElement("button");
-    s.className="swatch"; s.style.background=col; s.title=col;
-    s.addEventListener("click",()=> setVar("--grid", col));
-    sw.appendChild(s);
-  });
+  function isSolved(){ for(let i=0;i<81;i++){ if(valueAtIndex(i)!==state.solution[i]) return false; } return true; }
+  function onSolved(){ if(state._done) return; state._done=true; store.stats.completed+=1; store.stats.totalMistakes+=state.mistakes; if(store.stats.bestMistakes==null || state.mistakes<store.stats.bestMistakes) store.stats.bestMistakes=state.mistakes; saveApp(); updateStatsUI(); alert(`Klart! Misstag: ${state.mistakes}`); }
 
-  // Restore theme vars
-  loadTheme();
+  /* ===== Tangentbord & hint ===== */
+  function buildPads(){ for(let n=1;n<=9;n++){ const b=document.createElement('button'); b.className='btn'; b.textContent=n; b.dataset.n=String(n); b.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeSetMainAction(state.sel, String(n))); }); pads.main.appendChild(b); }
+    for(let n=1;n<=9;n++){ const b=document.createElement('button'); b.className='btn'; b.textContent=n; b.dataset.n=String(n); b.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeToggleNoteAction(state.sel, n, 1)); }); pads.n1.appendChild(b); }
+    for(let n=1;n<=9;n++){ const b=document.createElement('button'); b.className='btn'; b.textContent=n; b.dataset.n=String(n); b.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeToggleNoteAction(state.sel, n, 2)); }); pads.n2.appendChild(b); } }
 
-  // Restore realtime + version labels
-  qs("#verStart").textContent = APP_VERSION;
-  qs("#chkRealtime").checked = state.realtime;
+  function giveHint(){ const allowed=(i)=>{ const r=rOf(i), c=cOf(i); const forb=new Set(); for(let x=0;x<9;x++){ forb.add(valueAtIndex(id(r,x))); forb.add(valueAtIndex(id(x,c))); } const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3; for(let rr=br; rr<br+3; rr++) for(let cc=bc; cc<bc+3; cc++) forb.add(valueAtIndex(id(rr,cc))); const out=[]; for(let n=1;n<=9;n++) if(!forb.has(String(n))) out.push(n); return out; };
+    for(let i=0;i<81;i++){ if(state.puzzle[i]==='0' && state.main[i]==='0'){ const opts=allowed(i); if(opts.length===1){ state.sel=i; refreshHighlights(); setStatus(`Hint: (rad ${rOf(i)+1}, kol ${cOf(i)+1}) har exakt en kandidat.`); return; } } }
+    setStatus('Ingen enkel hint just nu.'); }
 
-  // Build pads once
-  buildPad(qs("#padMain"),"main");
-  buildPad(qs("#padN1"),"n1");
-  buildPad(qs("#padN2"),"n2");
+  /* ===== Tema & settings ===== */
+  function toHex(val){ if(!val) return '#000000'; if(val.startsWith('#')) return val; const m = val.match(/rgb[a]?\(([0-9]+), *([0-9]+), *([0-9]+)/i); if(!m) return '#000000'; const r=+m[1], g=+m[2], b=+m[3]; return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  function mix(a,b,t){ const pa=parseInt(a.slice(1),16), pb=parseInt(b.slice(1),16); const ra=(pa>>16)&255, ga=(pa>>8)&255, ba=pa&255; const rb=(pb>>16)&255, gb=(pb>>8)&255, bb=pb&255; const r=Math.round(ra+(rb-ra)*t), g=Math.round(ga+(gb-ga)*t), bc=Math.round(ba+(bb-ba)*t); return '#'+[r,g,bc].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  function setTheme(mode){ document.body.classList.toggle('theme-light', mode==='light'); document.body.classList.toggle('theme-dark', mode==='dark'); localStorage.setItem(LS_THEME, mode); makeSwatches(); }
+  function loadTheme(){ const t=localStorage.getItem(LS_THEME)||'light'; themeSelect.value=t; setTheme(t); }
+  function saveThemeVars(){ const vars={}; for(const [k,id] of Object.entries(colorInputs)){ vars[k]=getComputedStyle(document.body).getPropertyValue(k).trim(); } localStorage.setItem(LS_THEMEVARS, JSON.stringify(vars)); }
+  function loadThemeVars(){ try{ const raw=localStorage.getItem(LS_THEMEVARS); if(!raw) return; const vars=JSON.parse(raw); for(const [k,v] of Object.entries(vars)){ document.body.style.setProperty(k, v); const inp=document.getElementById(colorInputs[k]); if(inp) inp.value = toHex(v); } }catch{} }
 
-  showStart();
-}
+  function makeGridSwatches(){
+    const host=document.getElementById('sw-grid'); if(!host) return; host.innerHTML='';
+    const steps=['#000000','#222222','#444444','#666666','#888888','#aaaaaa','#cccccc','#ffffff'];
+    const current=toHex(getComputedStyle(document.body).getPropertyValue('--grid').trim());
+    steps.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(current===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty('--grid', hex); const inp=document.getElementById('c-grid'); if(inp) inp.value=hex; saveThemeVars(); makeGridSwatches(); }); host.appendChild(d); });
+  }
 
-/* ---- Sheet open/close ---- */
-function openSheet(open){
-  const s=qs("#sheet");
-  if(open){ s.classList.add("open"); s.setAttribute("aria-hidden","false"); }
-  else{ s.classList.remove("open"); s.setAttribute("aria-hidden","true"); }
-}
+  function makeSwatches(){
+    const isDark=document.body.classList.contains('theme-dark');
+    const baseBG=isDark?'#0f1115':'#ffffff';
+    const steps=isDark?[0.22,0.28,0.34,0.4]:[0.06,0.12,0.18,0.24];
+    const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']};
+    for(const [varName, [cid, baseVar]] of Object.entries(map)){
+      const baseColor=getComputedStyle(document.body).getPropertyValue(baseVar).trim()||'#1f5eff';
+      const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t));
+      const host=document.getElementById(cid); host.innerHTML='';
+      const current=getComputedStyle(document.body).getPropertyValue(varName).trim();
+      candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); });
+    }
+    // uppdatera även rutnäts-swatcharna
+    makeGridSwatches();
+  }
 
-/* ---- Init ---- */
-window.addEventListener("load", wire);
+  let lastFocused=null; const openSettings=()=>{ lastFocused=document.activeElement; modal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> themeSelect.focus(),0); }; const closeSettings=()=>{ modal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); };
 
-/* ---- Service Worker ---- */
-if("serviceWorker" in navigator){
-  window.addEventListener("load", ()=>{
-    navigator.serviceWorker.register("./sw.js").catch(()=>{});
-  });
-}
+  /* ===== Events ===== */
+  document.getElementById('btnSettings').addEventListener('click',openSettings); document.getElementById('closeSettings').addEventListener('click',closeSettings); modal.addEventListener('click', (e)=>{ if(e.target===modal) closeSettings(); });
+  themeSelect.addEventListener('change',()=> setTheme(themeSelect.value));
+  liveValidateChk.addEventListener('change',()=>{ state.live = liveValidateChk.checked; saveActive(); refreshHighlights(); });
+  for(const [varName, idc] of Object.entries(colorInputs)){ const el=document.getElementById(idc); el.addEventListener('input',()=>{ document.body.style.setProperty(varName, el.value); makeSwatches(); saveThemeVars(); if(varName==='--grid') makeGridSwatches(); }); }
+
+  buttons.check.addEventListener('click', checkBoard); buttons.undo.addEventListener('click', undo); buttons.redo.addEventListener('click', redo); buttons.eraseMain.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeClearMainKeepNotesAction(state.sel)); }); buttons.eraseN1.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeSetNotesMaskAction(state.sel,1,0)); }); buttons.eraseN2.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeSetNotesMaskAction(state.sel,2,0)); }); buttons.hint.addEventListener('click', giveHint);
+
+  window.addEventListener('keydown', (e)=>{ if(document.body.hasAttribute('inert')) return; if(state.sel==null || !screenGame.classList.contains('active')) return; if(e.key>='1' && e.key<='9'){ performAction(makeSetMainAction(state.sel, e.key)); } if(e.key==='Backspace'||e.key==='Delete'){ performAction(makeClearMainKeepNotesAction(state.sel)); } if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){ e.preventDefault(); let r=rOf(state.sel), c=cOf(state.sel); if(e.key==='ArrowUp') r=Math.max(0,r-1); if(e.key==='ArrowDown') r=Math.min(8,r+1); if(e.key==='ArrowLeft') c=Math.max(0,c-1); if(e.key==='ArrowRight') c=Math.min(8,c+1); state.sel=id(r,c); refreshHighlights(); } });
+
+  buttons.home.addEventListener('click', showStart);
+
+  /* ===== Init ===== */
+  function init(){
+    // Startskärm
+    renderSlots(); updateStatsUI();
+    // Tema + swatches
+    loadTheme(); loadThemeVars(); makeSwatches();
+    // Tangentbord
+    buildPads();
+  }
+  init();
+})();
+</script>
+<script>
+  // Registrera service worker för PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    });
+  }
 </script>
 </body>
 </html>
