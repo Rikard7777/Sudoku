@@ -33,7 +33,6 @@
     .btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:10px 14px;cursor:pointer;font-weight:700;touch-action:manipulation;box-shadow:var(--shadow)}
     .btn:disabled{opacity:.6}
     .btn.icon{width:44px;min-width:44px;height:44px;padding:0;display:grid;place-items:center;font-size:22px}
-    .actions .btn svg.ico{width:24px;height:24px;display:block}
     .top-right .btn{min-height:40px}
     .btn.primary{background:linear-gradient(180deg,var(--accent),#2760e6);border:0;color:#fff}
     .btn.ghost{background:transparent}
@@ -307,9 +306,7 @@
   document.querySelectorAll('.ver').forEach(el=> el.textContent = APP_VERSION);
 
   const modal = document.getElementById('modal');
-  const chooseModal = document.getElementById('chooseModal');
-  const chooseList = document.getElementById('chooseList');
-  const chooseCancel = document.getElementById('chooseCancel');
+  const chooseModal = document.getElementById('chooseModal'); // ej använd
   const appRoot = document.getElementById('appRoot');
   const themeSelect = document.getElementById('themeSelect');
   const liveValidateChk = document.getElementById('liveValidate');
@@ -341,7 +338,7 @@
     if(vars.hlSame) set('--hl-same', vars.hlSame);
   }
 
-  // demo swatches
+  // swatches
   const greys = ['#111111','#1f2937','#374151','#6b7280','#9ca3af','#cbd5e1','#e5e7eb','#f9fafb'];
   makeSwatches(gridSw, greys, (col,btn)=>{ document.body.style.setProperty('--grid', col); selectSwatch(gridSw,btn); commitThemeVars(); renderBoard(); });
   makeSwatches(hlSelSw, ['#e8f0ff','#14223d','#dbeafe','#eef2ff'], (c,b)=>{ document.body.style.setProperty('--hl-selected', c); selectSwatch(hlSelSw,b); commitThemeVars(); drawHighlights(); });
@@ -408,6 +405,14 @@
     showGame(); renderBoard(); mistakesEl.textContent=String(state.mistakes); diffTag.textContent = 'Svårighet: ' + labelForDiff(state.difficulty); refreshHighlights(); setStatus('Återupptaget.'); updateEmpties();
   }
 
+  function findSlotForNew(){
+    // 1) första olåsta tomma  2) annars första olåsta
+    let idx = store.slots.findIndex(s=>!s?.locked && !s?.state);
+    if(idx===-1) idx = store.slots.findIndex(s=>!s?.locked);
+    if(idx===-1) idx = 0; // om allt låst, skriv i 0
+    return idx;
+  }
+
   function startNewGame(diff, slotIndex){
     const list = PUZZLES[diff] || [];
     const p = list[Math.floor(Math.random()*list.length)];
@@ -439,7 +444,7 @@
     clearBoard();
     for(let r=0;r<9;r++) for(let c=0;c<9;c++){
       const i=id(r,c);
-      const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i;
+      const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i; cell.tabIndex=0;
       const input=document.createElement('input'); input.setAttribute('inputmode','none'); input.setAttribute('readonly','');
       input.value= state.fixed.has(i) ? String(pChar(state.puzzle,i)) : (state.values[i] ? String(state.values[i]) : '');
       if(state.fixed.has(i)) cell.classList.add('readonly');
@@ -449,6 +454,7 @@
       boardEl.appendChild(cell);
     }
     document.querySelectorAll('.cell').forEach(el=>{ const r=+el.dataset.r, c=+el.dataset.c; if(r%3===0) el.setAttribute('data-r', String(r)); if(c%3===0) el.setAttribute('data-c', String(c)); });
+    buildPads();
     drawHighlights();
   }
 
@@ -476,5 +482,108 @@
     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k)){
       e.preventDefault();
       const [r,c]=rc(state.sel); let nr=r, nc=c;
-      if(k==='ArrowUp') nr=(r+8)%9; if(k==='Down' or 0):
-      pass
+      if(k==='ArrowUp') nr=(r+8)%9; if(k==='ArrowDown') nr=(r+1)%9; if(k==='ArrowLeft') nc=(c+8)%9; if(k==='ArrowRight') nc=(c+1)%9;
+      selectCell(id(nr,nc));
+    }
+  }
+
+  function id(r,c){ return r*9 + c; }
+  function rc(i){ return [Math.floor(i/9), i%9]; }
+
+  function selectCell(i){ state.sel=i; drawHighlights(); }
+
+  function pushHistory(){
+    state.history.push({ values:state.values.slice(), n1:state.notes1.map(s=>new Set(s)), n2:state.notes2.map(s=>new Set(s)) });
+    state.redo.length=0;
+  }
+
+  function setMain(n){ const i=state.sel; if(state.fixed.has(i)) return; pushHistory(); state.values[i]=n; state.notes1[i].clear(); state.notes2[i].clear(); candidateCleanup(i,n); saveActive(); updateEmpties(); drawHighlights(); }
+  function clearMain(){ const i=state.sel; if(state.fixed.has(i)) return; pushHistory(); state.values[i]=0; saveActive(); updateEmpties(); drawHighlights(); }
+
+  function toggleNote(layer,n){ const i=state.sel; if(state.fixed.has(i)) return; const set = layer===1? state.notes1[i] : state.notes2[i]; if(set.has(n)) set.delete(n); else set.add(n); saveActive(); drawHighlights(); }
+
+  function candidateCleanup(i,n){ const [r,c]=rc(i); for(let k=0;k<9;k++){ state.notes1[id(r,k)].delete(n); state.notes2[id(r,k)].delete(n); state.notes1[id(k,c)].delete(n); state.notes2[id(k,c)].delete(n);} const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3; for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++){ const ii=id(br+rr,bc+cc); state.notes1[ii].delete(n); state.notes2[ii].delete(n);} }
+
+  function buildPads(){
+    function fill(el, onClick){ el.innerHTML=''; for(let n=1;n<=9;n++){ const b=document.createElement('button'); b.className='key'; b.textContent=String(n); b.onclick=()=> onClick(n); el.appendChild(b);} }
+    fill(pads.main, n=> setMain(n));
+    fill(pads.n1, n=> toggleNote(1,n));
+    fill(pads.n2, n=> toggleNote(2,n));
+  }
+
+  function updateEmpties(){
+    const filled = state.values.filter(v=>v!==0).length;
+    const empties = 81 - state.fixed.size - filled;
+    emptiesEl.textContent = String(empties);
+  }
+
+  function validateConflicts(){
+    const cells=[...document.querySelectorAll('.cell')];
+    cells.forEach(c=>c.classList.remove('error'));
+    for(let i=0;i<81;i++){
+      const v=state.values[i]; if(!v) continue;
+      const [r,c]=rc(i);
+      // row/col/box duplicates
+      for(let k=0;k<9;k++){
+        const i2=id(r,k); if(i2!==i && state.values[i2]===v) { cells[i].classList.add('error'); break; }
+        const j2=id(k,c); if(j2!==i && state.values[j2]===v) { cells[i].classList.add('error'); break; }
+      }
+      const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3; for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++){ const ii=id(br+rr,bc+cc); if(ii!==i && state.values[ii]===v) { cells[i].classList.add('error'); rr=cc=3; } }
+    }
+  }
+
+  buttons.eraseMain.onclick = clearMain;
+  buttons.eraseN1.onclick = ()=>{ state.notes1[state.sel].clear(); saveActive(); drawHighlights(); };
+  buttons.eraseN2.onclick = ()=>{ state.notes2[state.sel].clear(); saveActive(); drawHighlights(); };
+
+  buttons.undo.onclick = ()=>{ const s=state.history.pop(); if(!s) return; state.redo.push({ values:state.values.slice(), n1:state.notes1.map(x=>new Set(x)), n2:state.notes2.map(x=>new Set(x)) }); state.values=s.values.slice(); state.notes1=s.n1.map(x=>new Set(x)); state.notes2=s.n2.map(x=>new Set(x)); saveActive(); updateEmpties(); drawHighlights(); };
+  buttons.redo.onclick = ()=>{ const s=state.redo.pop(); if(!s) return; state.history.push({ values:state.values.slice(), n1:state.notes1.map(x=>new Set(x)), n2:state.notes2.map(x=>new Set(x)) }); state.values=s.values.slice(); state.notes1=s.n1.map(x=>new Set(x)); state.notes2=s.n2.map(x=>new Set(x)); saveActive(); updateEmpties(); drawHighlights(); };
+
+  buttons.hint.onclick = ()=>{ // enkel hint: fyll vald cell från lösningen
+    const i=state.sel; if(state.fixed.has(i)) return; if(state.solution){ const val=+state.solution[i]; if(val){ setMain(val); } }
+  };
+
+  buttons.check.onclick = ()=>{
+    // Klar? – jämför values + fixed mot solution
+    for(let i=0;i<81;i++){
+      const need = +state.solution[i];
+      if(state.fixed.has(i)){ if(+state.puzzle[i]!==need) { alert('Fel i pusslet.'); return; } }
+      else{ if(state.values[i]!==need){ alert('Inte klart än.'); return; } }
+    }
+    // uppdatera stats
+    store.stats.completed += 1;
+    if(store.stats.bestMistakes==null || state.mistakes < store.stats.bestMistakes) store.stats.bestMistakes = state.mistakes;
+    saveApp(); updateStatsUI(); alert('Klart!');
+  };
+
+  // Inställningar
+  function applyTheme(t){ document.body.classList.toggle('theme-dark', t==='dark'); document.body.classList.toggle('theme-light', t==='light'); saveTheme(t); }
+  themeSelect.onchange = ()=> applyTheme(themeSelect.value);
+  buttons.settings.onclick = ()=> modal.classList.add('open');
+  document.getElementById('closeSettings').onclick = ()=> modal.classList.remove('open');
+
+  Object.entries(colorInputs).forEach(([k,input])=>{ input.addEventListener('input', ()=>{ const map={grid:'--grid',prefill:'--prefill',main:'--main',note1:'--note1',note2:'--note2',hlSelected:'--hl-selected',hlSame:'--hl-same'}; document.body.style.setProperty(map[k], input.value); commitThemeVars(); if(k==='grid') renderBoard(); else drawHighlights(); }); });
+
+  // Startskärm knappar – starta direkt
+  document.querySelectorAll('[data-new]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ const idx=findSlotForNew(); startNewGame(btn.dataset.new, idx); });
+  });
+
+  // Init
+  (function init(){
+    // Tema
+    const t = loadTheme(); applyTheme(t); themeSelect.value = t;
+    // Färger
+    applyThemeVars(loadThemeVars());
+    // UI
+    document.getElementById('verStart').textContent = APP_VERSION; document.getElementById('verGame').textContent = APP_VERSION;
+    renderSlots(); updateStatsUI();
+    // fokuslyssnare
+    boardEl.addEventListener('keydown', onCellKey);
+  })();
+
+  function refreshHighlights(){ drawHighlights(); }
+
+  </script>
+</body>
+</html>
