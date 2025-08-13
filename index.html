@@ -16,33 +16,36 @@
       --bg:#f5f7fb; --card:#ffffff; --accent:#2b6bff;
       --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#ff0000; --note2:#2fa568;
       --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fde9e9; --hl-note2-match:#e9f6ef;
-      --error:#d12f2f; --muted:#445066; --text:#121417; --border:#d8deea
+      --error:#d12f2f; --muted:#445066; --text:#121417; --border:#cdd6e6; --grid:#000000; /* svart rutnät i ljust läge */
     }
     body.theme-dark{
-      --bg:#0c0f14; --card:#151a22; --accent:#2b6bff;
-      --prefill:#f1f5f9; --prefill-bg:#0f1626; --main:#cbe0ff; --note1:#ff6b6b; --note2:#60d394;
-      --hl-selected:#14223d; --hl-same:#1a2744; --hl-same-rc:#141e33; --hl-note1-match:#2a1313; --hl-note2-match:#102a18;
-      --error:#ff6b6b; --muted:#8ca0bf; --text:#f4f7fb; --border:#202a3a
+      --bg:#0f1115; --card:#171a21; --accent:#4f8cff;
+      --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#ff4747; --note2:#6dd79a;
+      --hl-selected:#1c2330; --hl-same:#152033; --hl-same-rc:#101726; --hl-note1-match:#2b1616; --hl-note2-match:#102419;
+      --error:#ff5d5d; --muted:#9aa4b2; --text:#e8eef9; --border:#232838; --grid:#ffffff; /* vitt rutnät i mörkt läge */
     }
 
-    .wrap{max-width:980px;margin:0 auto;padding:12px}
-    .screen{display:none}
+    .wrap{margin:0 auto;display:grid;gap:12px;place-items:center;max-width:980px;padding:12px;min-height:100svh}
+    .top-gap{height:env(safe-area-inset-top)}
+
+    /* ===== Gemensamma UI ===== */
+    h1{margin:0;font-size:clamp(18px,3.6vw,22px);display:flex;gap:.5ch;align-items:baseline;white-space:nowrap}
+    .btn{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:14px;padding:10px 14px;cursor:pointer;font-weight:700;touch-action:manipulation;box-shadow:var(--shadow)}
+    .btn:disabled{opacity:.6}
+    .btn.icon{width:44px;min-width:44px;height:44px;padding:0;display:grid;place-items:center;font-size:22px}
+    .actions .btn svg.ico{width:24px;height:24px;display:block}
+    .top-right .btn{min-height:40px}
+    .btn.primary{background:linear-gradient(180deg,var(--accent),#2760e6);border:0;color:#fff}
+    .btn.ghost{background:transparent}
+    .row{display:flex;gap:8px;align-items:center}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;box-shadow:var(--shadow);width:100%}
+    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+    /* ===== Skärmar ===== */
+    .screen{display:none;width:100%}
     .screen.active{display:block}
 
-    h1{margin:0 0 10px 0;font-size:34px;letter-spacing:.3px}
-    h1 small{font-weight:600;opacity:.75;margin-left:.5ch}
-    h2{margin:0 0 8px 0}
-    .card{background:var(--card);padding:12px;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);margin:10px 0}
-
-    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-    @media (max-width:560px){.grid4{grid-template-columns:repeat(2,1fr)}}
-    .col{display:flex;flex-direction:column;gap:8px}
-    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-
-    .btn{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:16px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
-    .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
-    .btn.icon{display:grid;place-items:center;padding:8px 12px}
-
+    /* ===== START ===== */
     .slot{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:12px}
     .slot .meta{font-size:12px;color:var(--muted)}
     .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -51,9 +54,9 @@
 
     /* ===== SPEL ===== */
     header.game{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;grid-template-areas:'title actions' 'stats actions';gap:8px;align-items:center;width:100%}
-    .top-left{grid-area:title;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+    .top-left{grid-area:title;display:flex;gap:8px;align-items:baseline;flex-wrap:nowrap;min-width:0}
     .stats{grid-area:stats;display:flex;gap:16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
-    .stats > div{min-width:92px}
+    .stats .num{color:var(--text);font-weight:700}
     .top-right{grid-area:actions;display:flex;gap:8px;flex-wrap:wrap;justify-self:end}
 
     .board-wrap{width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
@@ -74,8 +77,7 @@
     .cell.selected{background:var(--hl-selected);box-shadow:inset 0 0 0 2px var(--grid);} .cell.related{background:var(--hl-selected)}
     .cell.error input{color:var(--error)}
 
-    .pad-title{font-size:14px;color:var(--muted);margin:12px 0 8px}
-    .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+    .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin-top:10px}
     .key{display:grid;place-items:center;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--border);font-weight:800;cursor:pointer}
 
     .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -144,14 +146,9 @@
 
       <div class="board-wrap"><div id="board" class="board" aria-live="polite"></div></div>
 
-      <div class="pad-title">Huvudsiffror</div>
-      <div id="padMain" class="pad"></div>
-
-      <div class="pad-title">Anteckningar 1</div>
-      <div id="padN1" class="pad"></div>
-
-      <div class="pad-title">Anteckningar 2</div>
-      <div id="padN2" class="pad"></div>
+      <div id="padMain" class="pad" aria-label="Huvudsiffror"></div>
+      <div id="padN1" class="pad" aria-label="Anteckningar 1"></div>
+      <div id="padN2" class="pad" aria-label="Anteckningar 2"></div>
 
       <div class="actions">
         <button id="undo" class="btn" title="Ångra" aria-label="Ångra">↶</button>
@@ -235,7 +232,7 @@
   </div>
 
   <script>
-  const APP_VERSION = "v. 0.9.5";
+  const APP_VERSION = "v. 0.9.6";
 
   /* ======= Data (pussel), state & storage ======= */
   const PUZZLES = {
@@ -384,9 +381,9 @@
       const row=document.createElement('div'); row.className='slot';
       const left=document.createElement('div');
       if(s && s.state){
-        left.innerHTML = `<div><b>Plats ${i+1}</b></div><div class="meta">${labelForDiff(s.difficulty)} · ${s.savedAt||''}</div>`;
+        left.innerHTML = `<div><b>Plats ${i+1}</b></div><div class=\"meta\">${labelForDiff(s.difficulty)} · ${s.savedAt||''}</div>`;
       }else{
-        left.innerHTML = `<div><b>Plats ${i+1}</b> <span class="meta">tom</span></div>`;
+        left.innerHTML = `<div><b>Plats ${i+1}</b> <span class=\"meta\">tom</span></div>`;
       }
       const b1=document.createElement('button'); b1.className='btn'; b1.textContent='Fortsätt'; b1.disabled = !(s && s.state); b1.onclick=()=> loadSlotToGame(i);
       const b2=document.createElement('button'); b2.className='btn'; b2.textContent= s?.locked ? 'Låst' : 'Lås'; b2.onclick=()=> toggleLock(i);
@@ -479,89 +476,5 @@
     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k)){
       e.preventDefault();
       const [r,c]=rc(state.sel); let nr=r, nc=c;
-      if(k==='ArrowUp') nr=(r+8)%9; if(k==='ArrowDown') nr=(r+1)%9; if(k==='ArrowLeft') nc=(c+8)%9; if(k==='ArrowRight') nc=(c+1)%9;
-      selectCell(id(nr,nc));
-    }
-  }
-
-  function selectCell(i){ state.sel=i; drawHighlights(); document.querySelectorAll('.cell')[i]?.focus(); }
-
-  function setMain(n){
-    const i=state.sel; if(state.fixed.has(i)) return;
-    const prev=state.values[i]; if(prev===n) return;
-    pushUndo({t:'set',i,prev,val:n}); state.values[i]=n; clearNotes(i,n); drawHighlights(); updateEmpties(); saveActive();
-  }
-  function clearMain(){ const i=state.sel; if(state.fixed.has(i)) return; const prev=state.values[i]; if(!prev) return; pushUndo({t:'set',i,prev,val:0}); state.values[i]=0; drawHighlights(); updateEmpties(); saveActive(); }
-
-  function clearNotes(i,n){
-    for(let k=0;k<9;k++){ state.notes1[id(rc(i)[0],k)].delete(n); state.notes2[id(k,rc(i)[1])].delete(n); }
-    const br=Math.floor(rc(i)[0]/3)*3, bc=Math.floor(rc(i)[1]/3)*3; for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++){ const j=id(br+rr,bc+cc); state.notes1[j].delete(n); state.notes2[j].delete(n); }
-  }
-
-  function onNum(n,layer){ if(layer==='main'){ setMain(n); } else { const set = layer==='n1'? state.notes1[state.sel] : state.notes2[state.sel]; if(state.values[state.sel]) return; if(set.has(n)) set.delete(n); else set.add(n); drawHighlights(); saveActive(); } }
-
-  function makePad(el, layer){ el.innerHTML=''; for(let n=1;n<=9;n++){ const b=document.createElement('button'); b.className='key'; b.textContent=String(n); b.onclick=()=> onNum(n, layer); el.appendChild(b); } }
-
-  function pushUndo(a){ state.history.push(a); state.redo.length=0; }
-  function doUndo(){ const a=state.history.pop(); if(!a) return; state.redo.push(a); if(a.t==='set'){ state.values[a.i]=a.prev; } if(a.t==='note'){ const set= a.layer==='n1'? state.notes1[a.i] : state.notes2[a.i]; if(a.prev) set.add(a.n); else set.delete(a.n);} drawHighlights(); updateEmpties(); saveActive(); }
-  function doRedo(){ const a=state.redo.pop(); if(!a) return; state.history.push(a); if(a.t==='set'){ state.values[a.i]=a.val; } if(a.t==='note'){ const set= a.layer==='n1'? state.notes1[a.i] : state.notes2[a.i]; if(a.prev) set.delete(a.n); else set.add(a.n);} drawHighlights(); updateEmpties(); saveActive(); }
-
-  function groupDuplicates(idxList){ const map={}; idxList.forEach(i=>{ const v=state.values[i]; if(!v) return; (map[v] ||= []).push(i); }); return Object.values(map).filter(a=>a.length>1).flat(); }
-  function validateConflicts(){ document.querySelectorAll('.cell').forEach(c=>c.classList.remove('error')); for(let r=0;r<9;r++) mark(groupDuplicates([...Array(9)].map((_,c)=> id(r,c)))); for(let c=0;c<9;c++) mark(groupDuplicates([...Array(9)].map((_,r)=> id(r,c)))); for(let br=0;br<3;br++) for(let bc=0;bc<3;bc++){ const arr=[]; for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++) arr.push(id(br*3+rr, bc*3+cc)); mark(groupDuplicates(arr)); } function mark(list){ list.forEach(i=> document.querySelectorAll('.cell')[i]?.classList.add('error')); }}
-  function onCheck(){ const before=document.querySelectorAll('.cell.error').length; validateConflicts(); const after=document.querySelectorAll('.cell.error').length; if(after>0) state.mistakes++; mistakesEl.textContent=String(state.mistakes); saveActive(); checkSolved(); }
-  function checkSolved(){ if(updateEmpties()!==0) return; if(!isValid(state.values)) return; store.stats.completed += 1; store.stats.totalMistakes += state.mistakes; if(store.stats.bestMistakes==null) store.stats.bestMistakes = state.mistakes; else store.stats.bestMistakes = Math.min(store.stats.bestMistakes, state.mistakes); saveApp(); alert('Grattis!'); showStart(); }
-
-  function updateEmpties(){ let n=0; for(const v of state.values) if(!v) n++; emptiesEl.textContent=String(n); return n; }
-  function isValid(b){ for(let r=0;r<9;r++){ const s=new Set(); for(let c=0;c<9;c++){ const v=b[id(r,c)]; if(v<1||v>9||s.has(v)) return false; s.add(v);} } for(let c=0;c<9;c++){ const s=new Set(); for(let r=0;r<9;r++){ const v=b[id(r,c)]; if(v<1||v>9||s.has(v)) return false; s.add(v);} } for(let br=0;br<3;br++) for(let bc=0;bc<3;bc++){ const s=new Set(); for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++){ const v=b[id(br*3+rr, bc*3+cc)]; if(v<1||v>9||s.has(v)) return false; s.add(v);} } return true; }
-
-  function rc(i){ return [Math.floor(i/9), i%9]; }
-  function id(r,c){ return r*9+c; }
-
-  // Pads
-  makePad(pads.main,'main');
-  makePad(pads.n1,'n1');
-  makePad(pads.n2,'n2');
-
-  // Buttons
-  buttons.undo.onclick=doUndo;
-  buttons.redo.onclick=doRedo;
-  document.getElementById('eraseMain').onclick=()=>{ clearMain(); };
-  document.getElementById('eraseN1').onclick=()=>{ const s=state.notes1[state.sel]; if(!s.size) return; state.history.push({t:'note',layer:'n1',n:null,prev:[...s],i:state.sel}); s.clear(); drawHighlights(); saveActive(); };
-  document.getElementById('eraseN2').onclick=()=>{ const s=state.notes2[state.sel]; if(!s.size) return; state.history.push({t:'note',layer:'n2',n:null,prev:[...s],i:state.sel}); s.clear(); drawHighlights(); saveActive(); };
-  buttons.hint.onclick=()=>{ for(let i=0;i<81;i++){ if(state.values[i]) continue; const cs=candsAt(i); if(cs.length===1){ selectCell(i); setMain(cs[0]); return; } } alert('Inga enkla tips just nu.'); };
-
-  function candsAt(i){ const [r,c]=rc(i); const taken=new Set(); for(let k=0;k<9;k++){ taken.add(state.values[id(r,k)]); taken.add(state.values[id(k,c)]);} const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3; for(let rr=0;rr<3;rr++) for(let cc=0;cc<3;cc++) taken.add(state.values[id(br+rr,bc+cc)]); const res=[]; for(let n=1;n<=9;n++) if(!taken.has(n)) res.push(n); return res; }
-
-  // Settings
-  function openSettings(){ modal.classList.add('open'); appRoot.setAttribute('inert',''); }
-  function closeSettings(){ modal.classList.remove('open'); appRoot.removeAttribute('inert'); commitThemeVars(); }
-  buttons.settings.onclick=openSettings; document.getElementById('closeSettings').onclick=closeSettings;
-
-  themeSelect.value = loadTheme();
-  document.body.classList.toggle('theme-dark', themeSelect.value==='dark');
-  themeSelect.onchange = ()=>{ const val=themeSelect.value; document.body.classList.toggle('theme-dark', val==='dark'); saveTheme(val); };
-
-  // Theme vars restore
-  applyThemeVars(loadThemeVars());
-
-  // Startskärm: knappar startar direkt (ingen extra meny)
-  document.querySelectorAll('[data-new]').forEach(btn=> btn.onclick = ()=> startNewGame(btn.dataset.new, findSlotToUse()));
-
-  function findSlotToUse(){ for(let i=0;i<3;i++) if(!store.slots[i]?.state && !store.slots[i]?.locked) return i; for(let i=0;i<3;i++) if(!store.slots[i]?.locked) return i; return 0; }
-
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSettings(); });
-
-  /* ===== Init ===== */
-  function init(){ renderSlots(); updateStatsUI(); buildPads(); }
-  function buildPads(){ ['main','n1','n2'].forEach(()=>{}); }
-  init();
-
-  function updateEmpties(){ let n=0; for(let i=0;i<81;i++) if(!state.values[i]) n++; emptiesEl.textContent=String(n); return n; }
-
-  function updateEmptiesHeader(){ emptiesEl.textContent = String(state.values.filter(v=>!v).length); }
-
-  /* ===== Service Worker ===== */
-  if('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
-  </script>
-</body>
-</html>
+      if(k==='ArrowUp') nr=(r+8)%9; if(k==='Down' or 0):
+      pass
