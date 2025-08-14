@@ -14,7 +14,7 @@
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:block;min-height:100svh;overflow-y:auto}
     body.theme-light{
       --bg:#f5f7fb; --card:#ffffff; --accent:#2b6bff;
-      --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#ff0000; --note2:#2fa568;
+      --prefill:#111111; --prefill-bg:transparent; --main:#2b6bff; --note1:#ff0000; --note2:#2fa568;
       --hl-selected:#e0e8fb; --hl-same:#ebf0ff; --hl-same-rc:#f0f4ff;
       --hl-note1-match:#ffe8e8; --hl-note2-match:#e6f8ee;
       --error:#d12f2f; --muted:#445066; --text:#121417; --border:#cdd6e6; --grid:#000000;
@@ -115,8 +115,8 @@
     .panel label{font-size:12px;color:var(--muted)}
     .panel input[type='color']{width:100%;height:40px;border:1px solid var(--border);border-radius:8px;background:var(--card)}
     .switch{display:flex;align-items:center;gap:8px}
-    .swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-    .swatch{width:28px;height:24px;border-radius:6px;border:1px solid var(--border);cursor:pointer;outline-offset:2px}
+    .swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px; justify-content: space-between;}
+    .swatch{width:calc(25% - 5px);height:24px;border-radius:6px;border:1px solid var(--border);cursor:pointer;outline-offset:2px}
     .swatch.is-selected{outline:3px solid var(--accent)}
     #winPanel{text-align:center;}
     #winPanel .win-icon{font-size:48px;line-height:1;margin-bottom:8px;}
@@ -307,7 +307,7 @@
 <script>
 (()=>{
   /* ===== Pussel ===== */
-  const APP_VERSION = "v. 0.9.8.9";
+  const APP_VERSION = "v. 0.9.8.10";
   const PUZZLES = { // Helt ny, verifierad uppsättning pussel
     easy: [
       {p:"040005010008020500002100000000000006000070000100000000000006200003050700090400080", s:"649735812318624579572189643485213976231579468167842359754396281823951746916478125"},
@@ -346,16 +346,16 @@
         {p:"000000600000075000801000002000090050000408000050030000300000504000840000004000000", s:"573219648426375917891648322784912653132468795956734182319526874267841539784193265"}
     ],
     master: [
+        {p:"000000000000000006000020070000500900001000800008004000050080000400000000000000000", s:"187693524324157986596824173872516943641379852938284761759482613413765298268931475"},
         {p:"000107000008000000009030800000008070000000000040700000002040500000000300000801000", s:"623187459158924637479635812516498273897312745245763198362549781781276345954813926"},
         {p:"600000000000001000000070003000005000000800000004000005000002060000100000000040000", s:"628539741543281697917674253271465839356897124894312765789523461465178932132946578"},
         {p:"001000000000002000300000000000800000000000700009000008040000050000000000000000010", s:"861593472574612893392487615157836249238945761649721388743169524926358171185274936"},
+        {p:"000020050000007000500100008000000200040000030008000001000009003000800000010040000", s:"186423957324587196579169428851736249247915836968249751792651483635874219419328567"},
+        {p:"000008006000000040300005000070000000000040000000000020000800005010000000800300000", s:"425178396189632547367495218278516439531947862694283721742869153916724385853351672"},
         {p:"000000000000000400000005018000000000018000370000000000743000000006000000000000000", s:"362719485179834265485265718637542891218976354954183627743628519826451973591387142"},
         {p:"800000000003600000070090200050007000000045700000100030001000068008500010090000400", s:"812753649943682175675491283154237896369845721287169534521974368438526917796318452"},
         {p:"000000907000420180000705026100904000050000040000507009920108000034059000507000000", s:"653812947749423185812765326176984253358291746294537819925178634431659872587342691"},
-        {p:"000002000000080060700000000003000080000704000090000300000000005010020000000400000", s:"168952734324187965759643128243516987581794652697238341872361495915829376436475218"},
-        {p:"000020050000007000500100008000000200040000030008000001000009003000800000010040000", s:"186423957324587196579169428851736249247915836968249751792651483635874219419328567"},
-        {p:"000008006000000040300005000070000000000040000000000020000800005010000000800300000", s:"425178396189632547367495218278516439531947862694283721742869153916724385853351672"},
-        {p:"000000000000000006000020070000500900001000800008004000050080000400000000000000000", s:"187693524324157986596824173872516943641379852938284761759482613413765298268931475"}
+        {p:"000002000000080060700000000003000080000704000090000300000000005010020000000400000", s:"168952734324187965759643128243516987581794652697238341872361495915829376436475218"}
     ]
   };
 
@@ -657,10 +657,14 @@
   function saveThemeVars() { const mode = getThemeMode(); const key = LS_THEMEVARS_PREFIX + mode; const vars = {}; for (const [k] of Object.entries(colorInputs)) { vars[k] = document.body.style.getPropertyValue(k).trim(); } localStorage.setItem(key, JSON.stringify(vars)); }
   function makeGridSwatches(){ const host=document.getElementById('sw-grid'); if(!host) return; host.innerHTML=''; const steps=['#000000','#333333','#666666','#999999','#cccccc','#ffffff']; const current=toHex(getComputedStyle(document.body).getPropertyValue('--grid').trim()); steps.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(current===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty('--grid', hex); updateColorPickersUI(); saveThemeVars(); makeGridSwatches(); }); host.appendChild(d); }); }
   function makeSwatches(){
-    const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']};
-    for(const [varName, [cid, baseVar]] of Object.entries(map)){
+    const map={'--hl-selected':['sw-hl-selected'],'--hl-same':['sw-hl-same'],'--hl-same-rc':['sw-hl-same-rc'],'--hl-note1-match':['sw-hl-note1'],'--hl-note2-match':['sw-hl-note2']};
+    for(const [varName, [cid]] of Object.entries(map)){
       const baseColor = getComputedStyle(document.body).getPropertyValue(varName).trim();
-      const candidates = [mix(baseColor, '#ffffff', .5), mix(baseColor, '#ffffff', .25), baseColor, mix(baseColor, '#000000', .25), mix(baseColor, '#000000', .5)];
+      const isDark = getThemeMode() === 'dark';
+      const candidates = isDark
+          ? [mix(baseColor, '#ffffff', .3), mix(baseColor, '#ffffff', .15), baseColor, mix(baseColor, '#000000', .2)]
+          : [mix(baseColor, '#ffffff', .4), baseColor, mix(baseColor, '#000000', .1), mix(baseColor, '#000000', .2)];
+      
       const host=document.getElementById(cid); host.innerHTML='';
       const current=toHex(baseColor);
       candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(current===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); updateColorPickersUI(); makeSwatches(); saveThemeVars(); }); host.appendChild(d); });
