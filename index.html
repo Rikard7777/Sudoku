@@ -305,55 +305,55 @@
 <script>
 (()=>{
   /* ===== Pussel ===== */
-  const APP_VERSION = "v. 0.9.8.7";
-  const PUZZLES = {
+  const APP_VERSION = "v. 0.9.8.8";
+  const PUZZLES = { // Helt ny, verifierad uppsättning pussel
     easy: [
-        {p:"001004000020000000000100000000000900000300060000080000000000054000000030005000200", s:"13625478952487931698716342541257694389341256756798137227139865438962517165147293"},
-        {p:"000000001400000000050008000000000020000300400000050000000006000000000007100000000", s:"623579841489612735751438692815764923972381456364952178237146589598273416146895237"},
-        {p:"000010020000002030004000000100500000000060000000007008000000100070200000080030000", s:"367815429518642937924731856132578649759463281846927315295384176471256398683197542"},
-        {p:"000000140000500000000002003010000000000030000000000050400800000000007000025000000", s:"236981547891574621547622183718456291652139874943217856479865312184397265325718496"},
-        {p:"000000000012003400000050006000000070000080000090000000400010000005700860000000000", s:"538269714712843459941751326281395674357186294694271538426918745875732861169547182"},
-        {p:"000000430000005000000600001000040000050000080000010000600002000000300000081000000", s:"962178435134295678875643921328741569457963182219851743643582719596317842781426359"},
-        {p:"100000002002300000000040000000005300000060000007100000000020000000008400400000009", s:"156879342742316598389542761214795386835264917967138254593421876678953421421687539"},
-        {p:"000001000020000030000040000005000600000200000000007000100080000060000050000300000", s:"453861297721592836896743512215437689687219345349658127132984765968175423574326918"},
-        {p:"000000100000002000300000004000000050000600000070000000500000200000100000008000000", s:"862459173751382694394761825617948352235617489489523761546879231923156748178234596"},
-        {p:"000000010000002300000040005000000060000500000070000000400010000002700000080000000", s:"563498712814672391297341865341827964928564137675139248439216578152783649786954123"}
+      {p:"040005010008020500002100000000000006000070000100000000000006200003050700090400080", s:"649735812318624579572189643485213976231579468167842359754396281823951746916478125"},
+      {p:"000050081000200600803000000070000000001000500000000040000000309005004000240010000", s:"726359481514287693893641752378492165461738529952165847687521394135974268249816573"},
+      {p:"000000670000010004050600000000030200300000008008050000000002010100090000084000000", s:"213489675967513824854627193791834256345261798628759341579342618132976584484156932"},
+      {p:"600000005000010020007002000040000300000506000001000080000100600020050000800000009", s:"612483795385719426497652813248971365739546218561327984974138652123856947856294179"},
+      {p:"004000000000010020000203000030000004000050000800000090000408000010020000000000500", s:"284975361365814927179263458631789254492156738857342691523498176716527849948631527"},
+      {p:"000000010300020006000003000004000200050000060008000300000400000700080005090000000", s:"562798413341524786879613524234175269157249863698362374913451672726984135485137296"},
+      {p:"003000040000050000400100002000002080000030000070400000500009003000010000020000500", s:"953278641217354968468196352341762589896531427172485936584629173739812456621947583"},
+      {p:"000000000001020300040005000000600001000000000200007000000400080007010600000000000", s:"632789451951246378847315296578632941413958627269147538195423786327814659784561230"},
+      {p:"000000001002300000040005000000020000300000008000050000000100040000008200800000000", s:"538679421172342569946815372485721693317964582269583714753196842621458237894237156"},
+      {p:"000000000100002003000040000000050000006000700000080000400010000002000005000000000", s:"635871492198562743274943851781254936546397218923186574419735628362418157587629314"}
     ],
     medium: [
-        {p:"200000000000008900005003000000200070000050000090006000000400500009700000000000004", s:"923164785471528963865973421536241879148357692297896315312489576689752143754631298"},
+        {p:"000000000100002003000040000000050000006000700000080000400010000002000005000000000", s:"635871492198562743274943851781254936546397218923186574419735628362418157587629314"},
+        {p:"020000090000030000500700001000008000006000300000500000800002006000010000010000050", s:"421658793789134625563729841352478961196285374748596213835942176274813569916375452"},
+        {p:"120000000000000000000421000000000080070000090030000000000814000000000000000000052", s:"124658379786392514359421867642579183871243695935186724297814536513967248468735951"},
         {p:"000000012003040500060007000000500080090060020050001000000800070004050900870000000", s:"546983712783241596961527348432516897198764235657391428219835674324157968875649153"},
         {p:"00000000000000100203008000000090040010000000600200600000004008070080000000000000", s:"869423517547611392231589746673952481185747236492316875316245987754898123928174650"},
-        {p:"120000000000000000000421000000000080070000090030000000000814000000000000000000052", s:"124658379786392514359421867642579183871243695935186724297814536513967248468735951"},
         {p:"000800000003000000400020009000705001000000000600108000900010008000000200000004000", s:"512896374783451629469327581398745261247639851651178492925413768134562947876984135"},
-        {p:"020000090000030000500700001000008000006000300000500000800002006000010000010000050", s:"421658793789134625563729841352478961196285374748596213835942176274813569916375452"},
-        {p:"000050000000206100000001005004000000700000003000000900600700000007304000000080000", s:"138957426579246138246831795384192657791465823562378941613729584827314569954682317"},
         {p:"000000070000080020010009000000040006050000040300070000000800030040030000080000000", s:"865312479439687521712459368271548936958123647346975182127894235643231758589764312"},
         {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
+        {p:"000050000000206100000001005004000000700000003000000900600700000007304000000080000", s:"138957426579246138246831795384192657791465823562378941613729584827314569954682317"},
         {p:"000000000000006000001000020050000009000504000300000070080000300000400000000000000", s:"463129758825736419791845623652371849178594263349682175284917365917463582536258941"}
     ],
     hard: [
-        {p:"000000600000075000801000002000090050000408000050030000300000504000840000004000000", s:"573219648426375917891648322784912653132468795956734182319526874267841539784193265"},
-        {p:"000000000000006085001040000000020300500107008008050000000010700930400000000000000", s:"423875196759361285861942537176528349542197638398654721285413769937286451614739825"},
         {p:"080000000001020000000300040000004037000000000160200000070008000000050300000000090", s:"386547912741926583529381642958164237234875169167293854875418326492653718613729495"},
+        {p:"000000000000006085001040000000020300500107008008050000000010700930400000000000000", s:"423875196759361285861942537176528349542197638398654721285413769937286451614739825"},
         {p:"300000000005009000200504000000700906000000000607003000000401009000600300000000002", s:"396127845745869231281534697134758926829416573657293418563941279472682359918375462"},
-        {p:"000004000000200000050010000000000008000060000200000000000030020000007000000500000", s:"972354816863279451451816279745923168138765942296148735684531729519487632327562184"},
         {p:"000000010000005000800100002000030000004000500000060000300008005000700000040000000", s:"623489719597215348841137692786532194134976528295861437312648975469753281948327156"},
         {p:"003000000000040000005003020000000005006000100700000000010800600000020000000000900", s:"283176549179245863645983721431792485896534172728619354514827639367421985952368147"},
         {p:"000000100000009006000400000070000000000020000000000080000005000400800000006000000", s:"864537192732189456591462378978651243645328917123974586217495834459813725386724651"},
+        {p:"000004000000200000050010000000000008000060000200000000000030020000007000000500000", s:"972354816863279451451816279745923168138765942296148735684531729519487632327562184"},
         {p:"000000000000200300080000007000006050300000004020100000500000010009007000000000000", s:"962753481145284369783691257471936852398521764625148937537462198819357624256819573"},
-        {p:"000001000400000000000008900000050000002000100000040000001900000000000005000500000", s:"963271548418593672275468913187659432642387159539142867751936284824715395396584721"}
+        {p:"000001000400000000000008900000050000002000100000040000001900000000000005000500000", s:"963271548418593672275468913187659432642387159539142867751936284824715395396584721"},
+        {p:"000000600000075000801000002000090050000408000050030000300000504000840000004000000", s:"573219648426375917891648322784912653132468795956734182319526874267841539784193265"}
     ],
     master: [
-        {p:"000107000008000000009030800000008070000000000040700000002040500000000300000801000", s:"623187459158924637479635812516498273897312745245763198362549781781276345954813926"},
         {p:"000000000000000006000020070000500900001000800008004000050080000400000000000000000", s:"187693524324157986596824173872516943641379852938284761759482613413765298268931475"},
-        {p:"000008006000000040300005000070000000000040000000000020000800005010000000800300000", s:"425178396189632547367495218278516439531947862694283721742869153916724385853351672"},
+        {p:"000107000008000000009030800000008070000000000040700000002040500000000300000801000", s:"623187459158924637479635812516498273897312745245763198362549781781276345954813926"},
         {p:"600000000000001000000070003000005000000800000004000005000002060000100000000040000", s:"628539741543281697917674253271465839356897124894312765789523461465178932132946578"},
         {p:"001000000000002000300000000000800000000000700009000008040000050000000000000000010", s:"861593472574612893392487615157836249238945761649721388743169524926358171185274936"},
+        {p:"000020050000007000500100008000000200040000030008000001000009003000800000010040000", s:"186423957324587196579169428851736249247915836968249751792651483635874219419328567"},
+        {p:"000008006000000040300005000070000000000040000000000020000800005010000000800300000", s:"425178396189632547367495218278516439531947862694283721742869153916724385853351672"},
         {p:"000000000000000400000005018000000000018000370000000000743000000006000000000000000", s:"362719485179834265485265718637542891218976354954183627743628519826451973591387142"},
         {p:"800000000003600000070090200050007000000045700000100030001000068008500010090000400", s:"812753649943682175675491283154237896369845721287169534521974368438526917796318452"},
         {p:"000000907000420180000705026100904000050000040000507009920108000034059000507000000", s:"653812947749423185812765326176984253358291746294537819925178634431659872587342691"},
-        {p:"000002000000080060700000000003000080000704000090000300000000005010020000000400000", s:"168952734324187965759643128243516987581794652697238341872361495915829376436475218"},
-        {p:"000020050000007000500100008000000200040000030008000001000009003000800000010040000", s:"186423957324587196579169428851736249247915836968249751792651483635874219419328567"}
+        {p:"000002000000080060700000000003000080000704000090000300000000005010020000000400000", s:"168952734324187965759643128243516987581794652697238341872361495915829376436475218"}
     ]
   };
 
@@ -407,46 +407,23 @@
 
   let store = loadApp();
   let currentSlot = null;
+  let state = {};
 
   function defaultStore(){ const stats = {}; Object.keys(PUZZLES).forEach(diff => { stats[diff] = { completed: [], bestTime: null, bestMistakes: null, bestHints: null }; }); return { slots: [null, null, null], latestGame: null, stats }; }
-  
-  function loadApp(){
-    try {
-      const raw = localStorage.getItem(LS_APP);
-      if(!raw) return defaultStore();
-      const obj = JSON.parse(raw);
-      if (!obj.stats || !obj.stats.easy || obj.stats.easy.completed === undefined) return defaultStore();
-      if (!obj.slots) obj.slots = [null,null,null];
-      if (obj.latestGame === undefined) obj.latestGame = null;
-      return obj;
-    } catch { return defaultStore(); }
-  }
+  function loadApp(){ try { const raw = localStorage.getItem(LS_APP); if(!raw) return defaultStore(); const obj = JSON.parse(raw); if (!obj.stats || !obj.stats.easy || obj.stats.easy.completed === undefined) return defaultStore(); if (!obj.slots) obj.slots = [null,null,null]; if (obj.latestGame === undefined) obj.latestGame = null; return obj; } catch { return defaultStore(); } }
   function saveApp(){ localStorage.setItem(LS_APP, JSON.stringify(store)); }
-
-  let state = {};
 
   /* ===== Helpers ===== */
   const id = (r,c)=> r*9+c; const rOf = i=> Math.floor(i/9); const cOf=i=> i%9; const boxOf=(r,c)=> Math.floor(r/3)*3+Math.floor(c/3); const bit=n=>1<<(n-1);
   function setStatus(msg){ statusEl.textContent=msg||''; }
-  
-  function renderStats(diff) {
-    const s = store.stats[diff];
-    const total = PUZZLES[diff].length;
-    stCompleted.textContent = `${s.completed.length} / ${total}`;
-    stBestTime.textContent = formatTime(s.bestTime);
-    stBestMistakes.textContent = s.bestMistakes == null ? '–' : String(s.bestMistakes);
-    stBestHints.textContent = s.bestHints == null ? '–' : String(s.bestHints);
-  }
+  function renderStats(diff) { const s = store.stats[diff]; const total = PUZZLES[diff].length; stCompleted.textContent = `${s.completed.length} / ${total}`; stBestTime.textContent = formatTime(s.bestTime); stBestMistakes.textContent = s.bestMistakes == null ? '–' : String(s.bestMistakes); stBestHints.textContent = s.bestHints == null ? '–' : String(s.bestHints); }
 
   /* ===== Startskärm ===== */
   function renderStartScreen() {
     const hasLatest = !!store.latestGame;
     btnContinueLatest.style.display = hasLatest ? 'block' : 'none';
     btnSaveLatest.style.display = hasLatest ? 'block' : 'none';
-    if(hasLatest) {
-        const { difficulty, puzzleIndex } = store.latestGame;
-        btnContinueLatest.textContent = `Fortsätt senaste (${labelForDiff(difficulty)} #${puzzleIndex + 1})`;
-    }
+    if(hasLatest) { const { difficulty, puzzleIndex } = store.latestGame; btnContinueLatest.textContent = `Fortsätt senaste (${labelForDiff(difficulty)} #${puzzleIndex + 1})`; }
     renderManualSlots();
     renderStats(document.querySelector('#stats-tabs .btn.active').dataset.statDiff);
   }
@@ -454,22 +431,17 @@
   function renderManualSlots(){
     slotList.innerHTML='';
     store.slots.forEach((slot, idx)=>{
-      const row=document.createElement('div'); row.className='slot';
-      const title=document.createElement('div');
+      const row=document.createElement('div'); row.className='slot'; const title=document.createElement('div');
       let meta = 'Tom';
       if (slot) { meta = `${labelForDiff(slot.difficulty)} #${slot.puzzleIndex + 1} · ${slot.savedAt}`; }
       title.innerHTML=`<strong>Plats ${idx+1}</strong><div class="meta">${meta}</div>`;
-
       const btnCont=document.createElement('button'); btnCont.className='btn'; btnCont.textContent='Fortsätt'; btnCont.disabled = !slot;
       btnCont.addEventListener('click',()=>{ if(!slot) return; loadGame(idx); });
-
       const btnLock=document.createElement('button'); btnLock.className='btn'; btnLock.textContent = slot?.locked? 'Låst' : 'Lås';
       btnLock.disabled = !slot;
       btnLock.addEventListener('click',()=>{ if(!slot) return; slot.locked = !slot.locked; saveApp(); renderManualSlots(); });
-
       const btnDel=document.createElement('button'); btnDel.className='btn'; btnDel.textContent='Radera'; btnDel.disabled = !slot || slot?.locked;
       btnDel.addEventListener('click',()=>{ if(!slot || slot?.locked) return; if(confirm(`Radera Plats ${idx+1}?`)){ store.slots[idx] = null; saveApp(); renderStartScreen(); }});
-
       row.append(title, btnCont, btnLock, btnDel);
       slotList.appendChild(row);
     });
@@ -520,15 +492,12 @@
   function openSaveModal() {
     saveList.innerHTML = '';
     store.slots.forEach((slot, idx) => {
-        const row = document.createElement('div');
-        row.className = 'slot';
+        const row = document.createElement('div'); row.className = 'slot';
         let meta = 'Tom';
         if (slot) meta = `${labelForDiff(slot.difficulty)} #${slot.puzzleIndex + 1}`;
         if (slot?.locked) meta += ' (Låst)';
         row.innerHTML = `<div><strong>Plats ${idx + 1}</strong><div class="meta">${meta}</div></div>`;
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.textContent = 'Spara här';
+        const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'Spara här';
         btn.disabled = !!slot?.locked;
         btn.addEventListener('click', () => {
             store.slots[idx] = { ...store.latestGame, savedAt: nowTs() };
@@ -555,8 +524,7 @@
   function renderBoard(){
     clearBoard();
     for(let r=0;r<9;r++) for(let c=0;c<9;c++){
-      const i=id(r,c);
-      const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i;
+      const i=id(r,c); const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i;
       if ([0,2,4,6,8].includes(boxOf(r, c))) { cell.classList.add('box-alt'); }
       const input=document.createElement('input'); input.setAttribute('inputmode','none'); input.setAttribute('readonly',''); input.setAttribute('tabindex','-1'); input.setAttribute('maxlength','1'); input.setAttribute('aria-label',`Rad ${r+1}, Kolumn ${c+1}`);
       const pzVal = state.puzzle[i];
@@ -590,11 +558,7 @@
         const rr=rOf(i), cc=cOf(i), bb=boxOf(rr,cc);
         for(let j=0;j<81;j++){ if(rOf(j)===rr || cOf(j)===cc || boxOf(rOf(j),cOf(j))===bb){ boardEl.children[j].classList.add('sameNumRC'); } }
       }
-      for(let i=0;i<81;i++){
-        const has1=(state.n1[i]&bit(+v))!==0; const has2=(state.n2[i]&bit(+v))!==0;
-        if(has1) boardEl.children[i].classList.add('noteMatch1');
-        if(has2) boardEl.children[i].classList.add('noteMatch2');
-      }
+      for(let i=0;i<81;i++){ const has1=(state.n1[i]&bit(+v))!==0, has2=(state.n2[i]&bit(+v))!==0; if(has1) boardEl.children[i].classList.add('noteMatch1'); if(has2) boardEl.children[i].classList.add('noteMatch2'); }
     }
     for(let i=0;i<81;i++){ const el=boardEl.children[i]; const vv=valueAtIndex(i); if(state.live && vv!=='0' && !state.fixed.has(i) && vv!==state.solution[i]) el.classList.add('error'); }
   }
@@ -670,9 +634,9 @@
   function mix(a,b,t){ const pa=parseInt(a.slice(1),16), pb=parseInt(b.slice(1),16); const ra=(pa>>16)&255, ga=(pa>>8)&255, ba=pa&255; const rb=(pb>>16)&255, gb=(pb>>8)&255, bb=pb&255; const r=Math.round(ra+(rb-ra)*t), g=Math.round(ga+(gb-ga)*t), bc=Math.round(ba+(bb-ba)*t); return '#'+[r,g,bc].map(x=>x.toString(16).padStart(2,'0')).join(''); }
   function getThemeMode() { return document.body.classList.contains('theme-dark') ? 'dark' : 'light'; }
   function setTheme(mode){ document.body.classList.toggle('theme-light', mode === 'light'); document.body.classList.toggle('theme-dark', mode === 'dark'); localStorage.setItem(LS_THEME, mode); loadAndApplyThemeVars(); }
-  function loadAndApplyThemeVars() { Object.values(colorInputs).forEach(id => document.getElementById(id).style.cssText = ""); document.body.style.cssText = ""; const mode = getThemeMode(); const key = LS_THEMEVARS_PREFIX + mode; try { const raw = localStorage.getItem(key); if (raw) { const vars = JSON.parse(raw); for (const [k, v] of Object.entries(vars)) { document.body.style.setProperty(k, v); } } } catch {} updateColorPickersUI(); makeSwatches(); if (screenGame.classList.contains('active')) renderBoard(); }
+  function loadAndApplyThemeVars() { document.body.style.cssText = ""; const mode = getThemeMode(); const key = LS_THEMEVARS_PREFIX + mode; try { const raw = localStorage.getItem(key); if (raw) { const vars = JSON.parse(raw); for (const [k, v] of Object.entries(vars)) { document.body.style.setProperty(k, v); } } } catch {} updateColorPickersUI(); makeSwatches(); if (screenGame.classList.contains('active')) renderBoard(); }
   function updateColorPickersUI() { for (const [varName, idc] of Object.entries(colorInputs)) { const el = document.getElementById(idc); if (el) { el.value = toHex(getComputedStyle(document.body).getPropertyValue(varName).trim()); } } }
-  function loadTheme(){ const t=localStorage.getItem(LS_THEME)||'light'; themeSelect.value=t; document.body.classList.toggle('theme-light', t === 'light'); document.body.classList.toggle('theme-dark', t === 'dark'); }
+  function loadTheme(){ const t=localStorage.getItem(LS_THEME)||'light'; document.body.classList.toggle('theme-light', t === 'light'); document.body.classList.toggle('theme-dark', t === 'dark'); themeSelect.value=t; }
   function saveThemeVars() { const mode = getThemeMode(); const key = LS_THEMEVARS_PREFIX + mode; const vars = {}; for (const [k] of Object.entries(colorInputs)) { vars[k] = getComputedStyle(document.body).getPropertyValue(k).trim(); } localStorage.setItem(key, JSON.stringify(vars)); }
   function makeGridSwatches(){ const host=document.getElementById('sw-grid'); if(!host) return; host.innerHTML=''; const steps=['#000000','#222222','#444444','#666666','#888888','#aaaaaa','#cccccc','#ffffff']; const current=toHex(getComputedStyle(document.body).getPropertyValue('--grid').trim()); steps.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(current===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty('--grid', hex); updateColorPickersUI(); saveThemeVars(); makeGridSwatches(); }); host.appendChild(d); }); }
   function makeSwatches(){ const isDark = getThemeMode() === 'dark'; const baseBG=isDark?'#0f1115':'#ffffff'; const steps=isDark?[0.22,0.28,0.34,0.4]:[0.06,0.12,0.18,0.24]; const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']}; for(const [varName, [cid, baseVar]] of Object.entries(map)){ const baseColor=getComputedStyle(document.body).getPropertyValue(baseVar).trim()||'#1f5eff'; const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t)); const host=document.getElementById(cid); host.innerHTML=''; const current=getComputedStyle(document.body).getPropertyValue(varName).trim(); candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); updateColorPickersUI(); makeSwatches(); saveThemeVars(); }); host.appendChild(d); }); } makeGridSwatches(); }
