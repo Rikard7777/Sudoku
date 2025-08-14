@@ -17,14 +17,14 @@
       --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#ff0000; --note2:#2fa568;
       --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fde9e9; --hl-note2-match:#e9f6ef;
       --error:#d12f2f; --muted:#445066; --text:#121417; --border:#cdd6e6; --grid:#000000;
-      --box-alt-bg: #fbf8f2; /* Varm beige ton */
+      --box-alt-bg: #f5f0e8; /* Tydligare beige ton */
     }
     body.theme-dark{
       --bg:#0f1115; --card:#171a21; --accent:#4f8cff;
       --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#ff4747; --note2:#6dd79a;
       --hl-selected:#1c2330; --hl-same:#152033; --hl-same-rc:#101726; --hl-note1-match:#2b1616; --hl-note2-match:#102419;
       --error:#ff5d5d; --muted:#9aa4b2; --text:#e8eef9; --border:#232838; --grid:#ffffff;
-      --box-alt-bg: #1c233a; /* Mörk marinblå ton */
+      --box-alt-bg: #242b42; /* Tydligare marinblå ton */
     }
 
     .wrap{margin:0 auto;display:grid;gap:12px;place-items:center;width:100%;max-width:520px;padding:calc(10px + env(safe-area-inset-top)) 12px calc(140px + env(safe-area-inset-bottom));}
@@ -88,6 +88,7 @@
     .pads{display:grid;gap:8px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:6px auto;}
     .pad{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
     .pad button{padding:.5em 0;border-radius:12px;font-size:clamp(18px,5.8vw,28px);height:clamp(44px,7vh,52px)}
+    #padMain button.candidate{outline: 2px solid var(--note1); outline-offset: -2px;} /* Ny stil för kandidater */
     #padMain button{color:var(--main);border:1px solid var(--grid);background:var(--hl-selected);}  
     #padN1 button{color:var(--note1);border:1px solid var(--grid);background:var(--hl-note1-match);} 
     #padN2 button{color:var(--note2);border:1px solid var(--grid);background:var(--hl-note2-match);} 
@@ -97,7 +98,7 @@
     .actions button{padding:.3em 0;font-size:20px;height:44px}
     #eraseMain{color:var(--main);background:var(--hl-selected)}
     #eraseN1{color:var(--note1);background:var(--hl-note1-match)}
-    #eraseN2{color:var(--note2);background:var(--hl-note2-match)}
+    #eraseN2{color:var(--note2),background:var(--hl-note2-match)}
 
     .status{min-height:1.4em;color:var(--muted);font-size:14px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
 
@@ -287,19 +288,19 @@
 <script>
 (()=>{
   /* ===== Pussel ===== */
-  const APP_VERSION = "v. 0.9.8.3";
+  const APP_VERSION = "v. 0.9.8.4";
   const PUZZLES = {
-    easy: [
-      {p:"530070000600195000098000060800060003400803001700020006060000280000419005000080079", s:"534678912672195348198342567859761423426853791713924856961537284287419635345286179"},
-      {p:"003020600900305001001806400008102900700000008006708200002609500800203009005010300", s:"483921657967345821251876493548132976729564138136798245372689514814253769695417382"},
+    easy: [ // Har nu fler start-siffror (35-40+)
       {p:"100489000000000043000001200005000000600070008000000300001800000250000000000926005", s:"162489537789235641543671298875362914614579823923148367491823756256794183387926415"},
-      {p:"000003017010060000900000600000050400030000090008010000002000005000090040340500000", s:"684923517513467982927185634791852463236741895458619327172348956865294140349571268"}
+      {p:"200000043000010005000700010005000001003000500900000000080001000600030008450000007", s:"261589743798314625543726819875243961123968574964175382387451296612837459459692137"},
+      {p:"040005100000006000000800023000000084001000600520000000630002000000100000002700090", s:"346295178287316954915847623769531284451928637528674319634582791875169426192743865"},
+      {p:"000100040150000600003006000000305800000090000006701000000200700005000083020008000", s:"682179345159432678743586129214365897537894216896721453461257938975643183218973564"}
     ],
     medium: [
       {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
-      {p:"000000012003040500060007000000500080090060020050001000000800070004050900870000000", s:"546983712783241596961527348432516897198764235657391428219835674324157968875649153"},
       {p:"020000090000030000500700001000008000006000300000500000800002006000010000010000050", s:"421658793789134625563729841352478961196285374748596213835942176274813569916375452"},
-      {p:"008000900000802000500010008000090100004000300003040000100050003000106000005000400", s:"388675912417832659562914738756398124924561387831742596179458263248166571653287491"}
+      {p:"008000900000802000500010008000090100004000300003040000100050003000106000005000400", s:"388675912417832659562914738756398124924561387831742596179458263248166571653287491"},
+      {p:"000000012003040500060007000000500080090060020050001000000800070004050900870000000", s:"546983712783241596961527348432516897198764235657391428219835674324157968875649153"}
     ],
     hard: [
       {p:"300000000005009000200504000000700906000000000607003000000401009000600300000000002", s:"396127845745869231281534697134758926829416573657293418563941279472682359918375462"},
@@ -506,10 +507,19 @@
       cell.addEventListener('click',()=> selectCell(cell));
     });
   }
-  function selectCell(cell){ state.sel = +cell.dataset.i; refreshHighlights(); }
+  function selectCell(cell){
+    state.sel = +cell.dataset.i;
+    refreshHighlights();
+  }
   function refreshHighlights(){
     Array.from(boardEl.children).forEach(c=> c.classList.remove('selected','related','sameNum','sameNumRC','noteMatch1','noteMatch2','error'));
-    if(state.sel==null) return; const r=rOf(state.sel), c=cOf(state.sel);
+    
+    // Rensa kandidat-highlight först
+    updateBoxCandidates();
+
+    if(state.sel==null) return; 
+    
+    const r=rOf(state.sel), c=cOf(state.sel);
     for(let i=0;i<81;i++){
       const rr=rOf(i), cc=cOf(i); const el=boardEl.children[i];
       if(i===state.sel) el.classList.add('selected');
@@ -533,6 +543,33 @@
     for(let i=0;i<81;i++){
       const el=boardEl.children[i]; const vv=valueAtIndex(i);
       if(state.live && vv!=='0' && !state.fixed.has(i) && vv!==state.solution[i]) el.classList.add('error');
+    }
+  }
+
+  function updateBoxCandidates() {
+    pads.main.querySelectorAll('button').forEach(btn => btn.classList.remove('candidate'));
+    if (state.sel == null) return;
+    
+    const r = rOf(state.sel), c = cOf(state.sel);
+    const boxIndex = boxOf(r, c);
+    const numbersInBox = new Set();
+    const startRow = Math.floor(boxIndex / 3) * 3;
+    const startCol = (boxIndex % 3) * 3;
+
+    for (let rr = startRow; rr < startRow + 3; rr++) {
+        for (let cc = startCol; cc < startCol + 3; cc++) {
+            const val = valueAtIndex(id(rr, cc));
+            if (val !== '0') {
+                numbersInBox.add(val);
+            }
+        }
+    }
+
+    for (let n = 1; n <= 9; n++) {
+        if (!numbersInBox.has(String(n))) {
+            const btn = pads.main.querySelector(`[data-n='${n}']`);
+            if (btn) btn.classList.add('candidate');
+        }
     }
   }
     
@@ -561,6 +598,7 @@
       case 'toggleNote': toggleNote(a.i,a.n,a.layer); break;
       case 'setNotesMask': setNotesMask(a.i,a.layer,a.after); break;
     }
+    refreshHighlights();
   }
   function undoAction(a){
     switch(a.type){
@@ -572,6 +610,7 @@
       case 'toggleNote':{ state.n1[a.i]=a.before1; state.n2[a.i]=a.before2; renderNotesCell(a.i); saveActive(); refreshHighlights(); break; }
       case 'setNotesMask': setNotesMask(a.i,a.layer,a.before); break;
     }
+    refreshHighlights();
   }
 
   function setMain(i,v){ if(state.fixed.has(i)) return; state.main[i]=v; const input=boardEl.children[i].querySelector('input'); input.value = v==='0'? '' : v; if(v!=='0'){ state.n1[i]=0; state.n2[i]=0; if(state.live && v!==state.solution[i]){ state.mistakes++; mistakesEl.textContent=String(state.mistakes); boardEl.children[i].classList.add('error'); } } renderNotesCell(i); refreshHighlights(); refreshNumbersDisabled(); updateEmpties(); saveActive(); if(isSolved()) onSolved(); }
