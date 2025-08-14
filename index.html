@@ -20,11 +20,11 @@
       --box-alt-bg: #f5f0e8;
     }
     body.theme-dark{
-      --bg:#12161c; --card:#1c2128; --accent:#5c9cff;
-      --prefill:#e8eef9; --prefill-bg:transparent; --main:#8ab4ff; --note1:#ff5f5f; --note2:#7ae0a5;
-      --hl-selected:#2a3142; --hl-same:#22293b; --hl-same-rc:#1f2535; --hl-note1-match:#3a1f1f; --hl-note2-match:#1a3023;
-      --error:#ff7272; --muted:#a0a8b4; --text:#e8eef9; --border:#303642; --grid:#ffffff;
-      --box-alt-bg: #242b42;
+      --bg:#14181e; --card:#1e232b; --accent:#6ca2ff;
+      --prefill:#f0f5ff; --prefill-bg:transparent; --main:#94bfff; --note1:#ff6f6f; --note2:#82e6ac;
+      --hl-selected:#30384d; --hl-same:#282f40; --hl-same-rc:#242a3a; --hl-note1-match:#452828; --hl-note2-match:#233d2c;
+      --error:#ff8080; --muted:#aab2c0; --text:#f0f5ff; --border:#38404d; --grid:#ffffff;
+      --box-alt-bg: #2a3142;
     }
 
     .wrap{margin:0 auto;display:grid;gap:12px;place-items:center;width:100%;max-width:520px;padding:calc(10px + env(safe-area-inset-top)) 12px calc(140px + env(safe-area-inset-bottom));}
@@ -304,7 +304,7 @@
 <script>
 (()=>{
   /* ===== Pussel ===== */
-  const APP_VERSION = "v. 0.9.8.5";
+  const APP_VERSION = "v. 0.9.8.6";
   const PUZZLES = {
     easy: [
       {p:"100489000000000043000001200005000000600070008000000300001800000250000000000926005",s:"162489537789235641543671298875362914614579823923148367491823756256794183387926415"},
@@ -327,7 +327,7 @@
       {p:"000800000003000000400020009000705001000000000600108000900010008000000200000004000",s:"512896374783451629469327581398745261247639851651178492925413768134562947876984135"},
       {p:"000000070000080020010009000000040006050000040300070000000800030040030000080000000",s:"865312479439687521712459368271548936958123647346975182127894235643231758589764312"},
       {p:"000000000000001002030080000000900400100000006002006000000040080700800000000000000",s:"869423517547611392231589746673952481185747236492316875316245987754898123928174650"},
-      {p:"200000000000008900005003000000200070000050000090006000000400500009700000000000004",s:"923164785471528963865973421536241879148357692297896315312489576689752143754631298"},
+      {p:"120000000000000000000421000000000080070000090030000000000814000000000000000000052",s:"124658379786392514359421867642579183871243695935186724297814536513967248468735951"},
       {p:"000000000000006000001000020050000009000504000300000070080000300000400000000000000",s:"463129758825736419791845623652371849178594263349682175284917365917463582536258941"}
     ],
     hard: [
@@ -362,7 +362,6 @@
   const slotList = document.getElementById('slotList');
   const btnContinueLatest = document.getElementById('btnContinueLatest');
   
-  // Nya statistik-element
   const statsTabs = document.getElementById('stats-tabs');
   const stCompleted = document.getElementById('stCompleted');
   const stBestTime = document.getElementById('stBestTime');
@@ -411,8 +410,8 @@
 
   /* ===== Storage ===== */
   const LS_THEME = 'sudoku.theme.v1';
-  const LS_THEMEVARS = 'sudoku.themevars.v1';
-  const LS_APP   = 'sudoku.app.v2'; // Bumpad version för ny datastruktur
+  const LS_THEMEVARS_PREFIX = 'sudoku.themevars.'; // Ny prefix
+  const LS_APP   = 'sudoku.app.v2';
 
   function nowTs(){ const d=new Date(); const p=n=> String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
   function labelForDiff(d){ return ({easy:'Lätt',medium:'Medel',hard:'Svår',master:'Mästare'})[d]||d; }
@@ -440,14 +439,11 @@
       const raw = localStorage.getItem(LS_APP);
       if(!raw) return defaultStore();
       const obj = JSON.parse(raw);
-      // Validera att datastrukturen är den nya. Om inte, börja om.
       if (!obj.stats || !obj.stats.easy || obj.stats.easy.completed === undefined) {
           return defaultStore();
       }
-      // Säkerställ att alla delar finns
       if (!obj.slots) obj.slots = [null,null,null];
       if (obj.latestGame === undefined) obj.latestGame = null;
-
       return obj;
     } catch {
       return defaultStore();
@@ -479,19 +475,13 @@
 
   /* ===== Startskärm ===== */
   function renderStartScreen() {
-    renderContinueLatest();
+    btnContinueLatest.style.display = store.latestGame ? 'block' : 'none';
+    if(store.latestGame) {
+        const { difficulty, puzzleIndex } = store.latestGame;
+        btnContinueLatest.textContent = `Fortsätt senaste (${labelForDiff(difficulty)} #${puzzleIndex + 1})`;
+    }
     renderManualSlots();
     renderStats(document.querySelector('#stats-tabs .btn.active').dataset.statDiff);
-  }
-
-  function renderContinueLatest() {
-    if (store.latestGame) {
-      const { difficulty, puzzleIndex } = store.latestGame;
-      btnContinueLatest.textContent = `Fortsätt senaste (${labelForDiff(difficulty)} #${puzzleIndex + 1})`;
-      btnContinueLatest.style.display = 'block';
-    } else {
-      btnContinueLatest.style.display = 'none';
-    }
   }
 
   function renderManualSlots(){
@@ -509,7 +499,7 @@
       btnCont.addEventListener('click',()=>{ if(!slot) return; loadGame(idx); });
 
       const btnLock=document.createElement('button'); btnLock.className='btn'; btnLock.textContent = slot?.locked? 'Låst' : 'Lås';
-      btnLock.disabled = !slot; // Kan bara låsa en plats som inte är tom
+      btnLock.disabled = !slot;
       btnLock.addEventListener('click',()=>{ if(!slot) return; slot.locked = !slot.locked; saveApp(); renderManualSlots(); });
 
       const btnDel=document.createElement('button'); btnDel.className='btn'; btnDel.textContent='Radera'; btnDel.disabled = !slot || slot?.locked;
@@ -541,19 +531,22 @@
 
   function startNewFlow(diff){
     const puzzleIndex = findNextUnsolvedPuzzle(diff);
-    const p = PUZZLES[diff][puzzleIndex];
-    
+    loadAndStartPuzzle(diff, puzzleIndex, 'latest');
+  }
+
+  function loadAndStartPuzzle(diff, index, slot) {
+    const p = PUZZLES[diff][index];
     state = { 
-        difficulty:diff, puzzleIndex,
-        puzzle:p.p, solution:p.s, fixed:new Set(),
+        difficulty:diff, puzzleIndex: index,
+        puzzle: p.p, solution: p.s, fixed: new Set(),
         main:Array(81).fill('0'), n1:Array(81).fill(0), n2:Array(81).fill(0),
         sel:null, mistakes:0, hintsUsed: 0, startTime: Date.now(),
         live:liveValidateChk.checked, history:[], redo:[]
     };
     for(let i=0;i<81;i++) if(p.p[i]!== '0') state.fixed.add(i);
     
-    currentSlot = 'latest';
-    saveActiveGame(); // Sparar till store.latestGame
+    currentSlot = slot;
+    saveActiveGame();
     
     showGame();
     setupBoardForGame();
@@ -562,11 +555,14 @@
   function loadGame(slotId) {
     const savedState = (slotId === 'latest') ? store.latestGame : store.slots[slotId];
     if (!savedState) return;
+
+    // Robustare laddning - hämta pusseldata på nytt
+    const { difficulty, puzzleIndex } = savedState;
+    const p = PUZZLES[difficulty][puzzleIndex];
     
     currentSlot = slotId;
-    state = { ...savedState }; // Återställ hela state
-    
-    // Se till att state har alla nödvändiga nycklar
+    state = { ...savedState, puzzle: p.p, solution: p.s }; // Se till att pusseldata är korrekt
+
     state.history = state.history || [];
     state.redo = state.redo || [];
 
@@ -587,12 +583,13 @@
   function saveActiveGame(){
     if (currentSlot == null) return;
     
-    // Skapa en fullständig snapshot av state
     const snapshot = { ...state };
-    // Rensa ut tunga/onödiga delar från den manuella sparfilen
+    delete snapshot.puzzle; // Spara inte onödig data
+    delete snapshot.solution;
+    
     if (currentSlot !== 'latest') {
         snapshot.savedAt = nowTs();
-        delete snapshot.history; // Spara inte historik i manuella slots
+        delete snapshot.history;
         delete snapshot.redo;
     }
 
@@ -614,14 +611,13 @@
   function clearBoard(){ boardEl.innerHTML=''; }
   function renderBoard(){
     clearBoard();
+    state.fixed.clear();
     for(let r=0;r<9;r++) for(let c=0;c<9;c++){
       const i=id(r,c);
       const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i;
       
       const boxIndex = boxOf(r, c);
-      if ([0,2,4,6,8].includes(boxIndex)) {
-          cell.classList.add('box-alt');
-      }
+      if ([0,2,4,6,8].includes(boxIndex)) { cell.classList.add('box-alt'); }
 
       const input=document.createElement('input'); input.setAttribute('inputmode','none'); input.setAttribute('readonly',''); input.setAttribute('tabindex','-1'); input.setAttribute('maxlength','1'); input.setAttribute('aria-label',`Rad ${r+1}, Kolumn ${c+1}`);
       
@@ -711,11 +707,7 @@
   function valueAtIndex(i){ if(state.puzzle[i] !== '0') return state.puzzle[i]; return state.main[i] || '0'; }
 
   /* ===== Actions & Undo/Redo ===== */
-  function makeSetMainAction(i, val){
-    const before = state.main[i]; const a={type:'setMain', i, before, after:val, cleared1:[], cleared2:[]};
-    if(val!=='0'){ const n=+val; const r=rOf(i), c=cOf(i), b=boxOf(r,c); for(let j=0;j<81;j++){ if(j===i) continue; const rr=rOf(j), cc=cOf(j); if(rr===r||cc===c||boxOf(rr,cc)===b){ if(state.n1[j]&bit(n)) a.cleared1.push(j); if(state.n2[j]&bit(n)) a.cleared2.push(j); } } }
-    return a;
-  }
+  function makeSetMainAction(i, val){ const before = state.main[i]; const a={type:'setMain', i, before, after:val, cleared1:[], cleared2:[]}; if(val!=='0'){ const n=+val; const r=rOf(i), c=cOf(i), b=boxOf(r,c); for(let j=0;j<81;j++){ if(j===i) continue; const rr=rOf(j), cc=cOf(j); if(rr===r||cc===c||boxOf(rr,cc)===b){ if(state.n1[j]&bit(n)) a.cleared1.push(j); if(state.n2[j]&bit(n)) a.cleared2.push(j); } } } return a; }
   function makeClearMainKeepNotesAction(i){ return {type:'clearMainKeepNotes', i, before:state.main[i]}; }
   function makeToggleNoteAction(i, n, layer){ const before1=state.n1[i], before2=state.n2[i]; return {type:'toggleNote', i, n, layer, before1, before2}; }
   function makeSetNotesMaskAction(i, layer, mask){ return {type:'setNotesMask', i, layer, before: layer===1? state.n1[i]:state.n2[i], after:mask}; }
@@ -753,32 +745,17 @@
 
   function isSolved(){ for(let i=0;i<81;i++){ if(valueAtIndex(i)!==state.solution[i]) return false; } return true; }
   function onSolved(){
-    if(state._done) return;
-    state._done = true;
-    
-    // Uppdatera statistik
+    if(state._done) return; state._done = true;
     const diff = state.difficulty;
     const stats = store.stats[diff];
     const elapsedTime = Date.now() - state.startTime;
-
-    if (!stats.completed.includes(state.puzzleIndex)) {
-        stats.completed.push(state.puzzleIndex);
-    }
-    if (stats.bestTime == null || elapsedTime < stats.bestTime) {
-        stats.bestTime = elapsedTime;
-    }
-    if (stats.bestMistakes == null || state.mistakes < stats.bestMistakes) {
-        stats.bestMistakes = state.mistakes;
-    }
-    if (stats.bestHints == null || state.hintsUsed < stats.bestHints) {
-        stats.bestHints = state.hintsUsed;
-    }
-    
-    // Rensa senaste spelet
+    if (!stats.completed.includes(state.puzzleIndex)) { stats.completed.push(state.puzzleIndex); }
+    if (stats.bestTime == null || elapsedTime < stats.bestTime) { stats.bestTime = elapsedTime; }
+    if (stats.bestMistakes == null || state.mistakes < stats.bestMistakes) { stats.bestMistakes = state.mistakes; }
+    if (stats.bestHints == null || state.hintsUsed < stats.bestHints) { stats.bestHints = state.hintsUsed; }
     store.latestGame = null;
     saveApp();
     renderStartScreen();
-    
     openWinModal(elapsedTime);
   }
 
@@ -794,20 +771,61 @@
   /* ===== Tema & settings ===== */
   function toHex(val){ if(!val) return '#000000'; if(val.startsWith('#')) return val; const m = val.match(/rgb[a]?\(([0-9]+), *([0-9]+), *([0-9]+)/i); if(!m) return '#000000'; const r=+m[1], g=+m[2], b=+m[3]; return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); }
   function mix(a,b,t){ const pa=parseInt(a.slice(1),16), pb=parseInt(b.slice(1),16); const ra=(pa>>16)&255, ga=(pa>>8)&255, ba=pa&255; const rb=(pb>>16)&255, gb=(pb>>8)&255, bb=pb&255; const r=Math.round(ra+(rb-ra)*t), g=Math.round(ga+(gb-ga)*t), bc=Math.round(ba+(bb-ba)*t); return '#'+[r,g,bc].map(x=>x.toString(16).padStart(2,'0')).join(''); }
-  function setTheme(mode){ document.body.classList.toggle('theme-light', mode==='light'); document.body.classList.toggle('theme-dark', mode==='dark'); localStorage.setItem(LS_THEME, mode); makeSwatches(); }
+  
+  function getThemeMode() { return document.body.classList.contains('theme-dark') ? 'dark' : 'light'; }
+
+  function setTheme(mode){
+    document.body.classList.toggle('theme-light', mode === 'light');
+    document.body.classList.toggle('theme-dark', mode === 'dark');
+    localStorage.setItem(LS_THEME, mode);
+    loadThemeVars(); // Ladda anpassade färger för det nya temat
+    updateColorPickersUI(); // Uppdatera färg-väljarna
+    makeSwatches();
+  }
+  
+  function updateColorPickersUI() {
+    for (const [varName, idc] of Object.entries(colorInputs)) {
+        const el = document.getElementById(idc);
+        if (el) {
+            el.value = toHex(getComputedStyle(document.body).getPropertyValue(varName).trim());
+        }
+    }
+  }
+
   function loadTheme(){ const t=localStorage.getItem(LS_THEME)||'light'; themeSelect.value=t; setTheme(t); }
-  function saveThemeVars(){ const vars={}; for(const [k,id] of Object.entries(colorInputs)){ vars[k]=getComputedStyle(document.body).getPropertyValue(k).trim(); } localStorage.setItem(LS_THEMEVARS, JSON.stringify(vars)); }
-  function loadThemeVars(){ try{ const raw=localStorage.getItem(LS_THEMEVARS); if(!raw) return; const vars=JSON.parse(raw); for(const [k,v] of Object.entries(vars)){ document.body.style.setProperty(k, v); const inp=document.getElementById(colorInputs[k]); if(inp) inp.value = toHex(v); } }catch{} }
+  
+  function saveThemeVars() {
+      const mode = getThemeMode();
+      const key = LS_THEMEVARS_PREFIX + mode;
+      const vars = {};
+      for (const [k] of Object.entries(colorInputs)) {
+          vars[k] = getComputedStyle(document.body).getPropertyValue(k).trim();
+      }
+      localStorage.setItem(key, JSON.stringify(vars));
+  }
+
+  function loadThemeVars() {
+      const mode = getThemeMode();
+      const key = LS_THEMEVARS_PREFIX + mode;
+      try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return;
+          const vars = JSON.parse(raw);
+          for (const [k, v] of Object.entries(vars)) {
+              document.body.style.setProperty(k, v);
+          }
+      } catch {}
+  }
 
   function makeGridSwatches(){
     const host=document.getElementById('sw-grid'); if(!host) return; host.innerHTML='';
     const steps=['#000000','#222222','#444444','#666666','#888888','#aaaaaa','#cccccc','#ffffff'];
     const current=toHex(getComputedStyle(document.body).getPropertyValue('--grid').trim());
-    steps.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(current===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty('--grid', hex); const inp=document.getElementById('c-grid'); if(inp) inp.value=hex; saveThemeVars(); makeGridSwatches(); }); host.appendChild(d); });
+    steps.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(current===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty('--grid', hex); updateColorPickersUI(); saveThemeVars(); makeGridSwatches(); }); host.appendChild(d); });
   }
 
   function makeSwatches(){
-    const isDark=document.body.classList.contains('theme-dark');
+    const isDark = getThemeMode() === 'dark';
     const baseBG=isDark?'#0f1115':'#ffffff';
     const steps=isDark?[0.22,0.28,0.34,0.4]:[0.06,0.12,0.18,0.24];
     const map={'--hl-selected':['sw-hl-selected','--main'],'--hl-same':['sw-hl-same','--main'],'--hl-same-rc':['sw-hl-same-rc','--main'],'--hl-note1-match':['sw-hl-note1','--note1'],'--hl-note2-match':['sw-hl-note2','--note2']};
@@ -816,14 +834,14 @@
       const candidates=steps.map(t=> mix(baseBG, toHex(baseColor), t));
       const host=document.getElementById(cid); host.innerHTML='';
       const current=getComputedStyle(document.body).getPropertyValue(varName).trim();
-      candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); });
+      candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); updateColorPickersUI(); makeSwatches(); saveThemeVars(); }); host.appendChild(d); });
     }
     makeGridSwatches();
   }
 
   let lastFocused=null;
-  const openSettings=()=>{ lastFocused=document.activeElement; modal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> themeSelect.focus(),0); };
-  const closeSettings=()=>{ modal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); };
+  const openSettings=()=>{ lastFocused=document.activeElement; updateColorPickersUI(); modal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> themeSelect.focus(),0); };
+  const closeSettings=()=>{ modal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); saveThemeVars(); };
   
   const openWinModal=(elapsedTime)=>{
     lastFocused=document.activeElement;
@@ -843,7 +861,7 @@
   
   themeSelect.addEventListener('change',()=> setTheme(themeSelect.value));
   liveValidateChk.addEventListener('change',()=>{ state.live = liveValidateChk.checked; refreshHighlights(); });
-  for(const [varName, idc] of Object.entries(colorInputs)){ const el=document.getElementById(idc); el.addEventListener('input',()=>{ document.body.style.setProperty(varName, el.value); makeSwatches(); saveThemeVars(); if(varName==='--grid') makeGridSwatches(); }); }
+  for(const [varName, idc] of Object.entries(colorInputs)){ const el=document.getElementById(idc); el.addEventListener('input',()=>{ document.body.style.setProperty(varName, el.value); makeSwatches(); }); }
 
   buttons.check.addEventListener('click', checkBoard); buttons.undo.addEventListener('click', undo); buttons.redo.addEventListener('click', redo); buttons.eraseMain.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeClearMainKeepNotesAction(state.sel)); }); buttons.eraseN1.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeSetNotesMaskAction(state.sel,1,0)); }); buttons.eraseN2.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeSetNotesMaskAction(state.sel,2,0)); }); buttons.hint.addEventListener('click', giveHint);
 
@@ -851,8 +869,8 @@
 
   /* ===== Init ===== */
   function init(){
+    loadTheme(); // Måste köras först för att sätta klassen
     renderStartScreen();
-    loadTheme(); loadThemeVars(); makeSwatches();
     buildPads();
   }
   init();
