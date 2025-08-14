@@ -8,7 +8,7 @@
   <title>Sudoku – mobil</title>
   <style>
     /* ===== Bas & teman ===== */
-    :root{ --shadow:0 8px 24px rgba(11,20,43,.08); }
+    :root{ --shadow:0 8px 24px rgba(11,20,43,.08); --box-alt-bg: transparent; }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:block;min-height:100svh;overflow-y:auto}
@@ -17,12 +17,14 @@
       --prefill:#111; --prefill-bg:transparent; --main:#1f5eff; --note1:#ff0000; --note2:#2fa568;
       --hl-selected:#e8f0ff; --hl-same:#f3f7ff; --hl-same-rc:#eef4ff; --hl-note1-match:#fde9e9; --hl-note2-match:#e9f6ef;
       --error:#d12f2f; --muted:#445066; --text:#121417; --border:#cdd6e6; --grid:#000000; /* svart rutnät i ljust läge */
+      --box-alt-bg: #fafbff;
     }
     body.theme-dark{
       --bg:#0f1115; --card:#171a21; --accent:#4f8cff;
       --prefill:#e8eef9; --prefill-bg:transparent; --main:#7aa6ff; --note1:#ff4747; --note2:#6dd79a;
       --hl-selected:#1c2330; --hl-same:#152033; --hl-same-rc:#101726; --hl-note1-match:#2b1616; --hl-note2-match:#102419;
       --error:#ff5d5d; --muted:#9aa4b2; --text:#e8eef9; --border:#232838; --grid:#ffffff; /* vitt rutnät i mörkt läge */
+      --box-alt-bg: #13161b;
     }
 
     .wrap{margin:0 auto;display:grid;gap:12px;place-items:center;width:100%;max-width:520px;padding:calc(10px + env(safe-area-inset-top)) 12px calc(140px + env(safe-area-inset-bottom));}
@@ -31,7 +33,6 @@
     h1{margin:0;font-size:clamp(18px,2.6vh,24px);display:flex;gap:.5ch;align-items:baseline;white-space:nowrap}
     .btn{background:var(--card);color:var(--text);border:1px solid var(--border);padding:.6em 1em;border-radius:12px;cursor:pointer;font-weight:700;touch-action:manipulation;box-shadow:var(--shadow);min-height:44px}
     .btn:active{transform:scale(.98)}
-    /* versions/diff badges */
     h1 .ver, h1 .diff{font-size:.8em;color:var(--muted);font-weight:600;margin-left:.35em}
     .btn.icon{width:44px;min-width:44px;height:44px;padding:0;display:grid;place-items:center;font-size:22px}
     .actions .btn svg.ico{width:24px;height:24px;display:block}
@@ -54,7 +55,6 @@
     .stats-grid .stat strong{display:block;font-size:20px}
 
     /* ===== SPEL ===== */
-    /* Tvåradigt huvud: 1) Titel m. version + svårighet  2) Vänster: Misstag/Tomma  Höger: knappar */
     header.game{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;grid-template-areas:'title actions' 'stats actions';gap:8px;align-items:center;width:100%}
     .top-left{grid-area:title;display:flex;gap:8px;align-items:baseline;min-width:0}
     .stats{grid-area:stats;display:flex;gap:16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
@@ -67,6 +67,8 @@
     .cell input{width:100%;height:100%;text-align:center;background:transparent;border:0;outline:none;color:var(--main);font-size:clamp(18px,6.2vw,32px);font-weight:800;caret-color:transparent;pointer-events:none;}
     .cell.readonly input{color:var(--prefill)}
     .cell.readonly{background:var(--prefill-bg)}
+    /* Schackbräde-bakgrund för 3x3-boxar */
+    .cell.box-alt{background-color:var(--box-alt-bg);}
     /* 3x3 block tjockare linjer */
     .cell[data-r="3"], .cell[data-r="6"]{ border-bottom:2px solid var(--grid); }
     .cell[data-c="3"], .cell[data-c="6"]{ border-right:2px solid var(--grid); }
@@ -101,8 +103,8 @@
 
     .status{min-height:1.4em;color:var(--muted);font-size:14px;width:min(calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 520px);margin:0 auto;}
 
-    /* Modal (inställningar + välj slot) */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:12px}
+    /* Modaler */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:12px;z-index:100}
     .modal.open{display:flex}
     .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;max-width:720px;width:100%;box-shadow:var(--shadow)}
     .panel h2{margin:.2em 0 8px 0;font-size:18px}
@@ -113,6 +115,8 @@
     .swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
     .swatch{width:28px;height:24px;border-radius:6px;border:1px solid var(--border);cursor:pointer;outline-offset:2px}
     .swatch.is-selected{outline:3px solid var(--accent)}
+    #winPanel{text-align:center;}
+    #winPanel .win-icon{font-size:48px;line-height:1;margin-bottom:8px;}
   </style>
 </head>
 <body class="theme-light">
@@ -225,7 +229,6 @@
           <label>Anteckningar 2</label>
           <input type="color" id="c-note2" value="#2fa568">
         </div>
-
         <div>
           <label>Markerad rad/kolumn/box</label>
           <input type="color" id="c-hl-selected" value="#e8f0ff">
@@ -269,16 +272,41 @@
       </div>
     </div>
   </div>
+  
+  <!-- ===== Win Modal ===== -->
+  <div id="winModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div id="winPanel" class="panel" style="max-width:380px">
+      <div class="win-icon">🏆</div>
+      <h2 id="winTitle">Grattis, du klarade det!</h2>
+      <p>Misstag: <strong id="winMistakes">0</strong></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+        <button id="winNewGame" class="btn primary">Nytt spel</button>
+        <button id="winHome" class="btn">Gå till start</button>
+      </div>
+    </div>
+  </div>
 
 <script>
 (()=>{
   /* ===== Pussel ===== */
-  const APP_VERSION = "v. 0.9.7";
+  const APP_VERSION = "v. 0.9.8"; // Uppdaterat versionsnummer
   const PUZZLES = {
-    easy:   {p:"530070000600195000098000060800060003400803001700020006060000280000419005000080079", s:"534678912672195348198342567859761423426853791713924856961537284287419635345286179"},
-    medium: {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
-    hard:   {p:"300000000005009000200504000000700906000000000607003000000401009000600300000000002", s:"396127845745869231281534697134758926829416573657293418563941279472682359918375462"},
-    master: {p:"000000907000420180000705026100904000050000040000507009920108000034059000507000000", s:"653812947749423185812765326176984253358291746294537819925178634431659872587342691"}
+    easy: [
+      {p:"530070000600195000098000060800060003400803001700020006060000280000419005000080079", s:"534678912672195348198342567859761423426853791713924856961537284287419635345286179"},
+      {p:"003020600900305001001806400008102900700000008006708200002609500800203009005010300", s:"483921657967345821251876493548132976729564138136798245372689514814253769695417382"}
+    ],
+    medium: [
+      {p:"000260701680070090190004500820100040004602900050003028009300074040050036703018000", s:"435269781682571493197834562826195347374682915951743628519326874248957136763418259"},
+      {p:"000000012003040500060007000000500080090060020050001000000800070004050900870000000", s:"546983712783241596961527348432516897198764235657391428219835674324157968875649153"}
+    ],
+    hard: [
+      {p:"300000000005009000200504000000700906000000000607003000000401009000600300000000002", s:"396127845745869231281534697134758926829416573657293418563941279472682359918375462"},
+      {p:"000000000000006085001040000000020300500107008008050000000010700930400000000000000", s:"423875196759361285861942537176528349542197638398654721285413769937286451614739825"}
+    ],
+    master: [
+      {p:"000000907000420180000705026100904000050000040000507009920108000034059000507000000", s:"653812947749423185812765326176984253358291746294537819925178634431659872587342691"},
+      {p:"800000000003600000070090200050007000000045700000100030001000068008500010090000400", s:"812753649943682175675491283154237896369845721287169534521974368438526917796318452"}
+    ]
   };
 
   /* ===== DOM ===== */
@@ -309,13 +337,14 @@
   };
   const pads = { main: document.getElementById('padMain'), n1: document.getElementById('padN1'), n2: document.getElementById('padN2') };
 
-  // visa version i rubrikerna
   document.querySelectorAll('.ver').forEach(el=> el.textContent = APP_VERSION);
 
   const modal = document.getElementById('modal');
   const chooseModal = document.getElementById('chooseModal');
   const chooseList = document.getElementById('chooseList');
   const chooseCancel = document.getElementById('chooseCancel');
+  const winModal = document.getElementById('winModal');
+  const winMistakes = document.getElementById('winMistakes');
   const appRoot = document.getElementById('appRoot');
   const themeSelect = document.getElementById('themeSelect');
   const liveValidateChk = document.getElementById('liveValidate');
@@ -334,7 +363,7 @@
   function labelForDiff(d){ return ({easy:'Lätt',medium:'Medel',hard:'Svår',master:'Mästare'})[d]||d; }
 
   let store = loadApp();
-  let currentSlot = null; // 0..2 eller null
+  let currentSlot = null;
 
   function defaultStats(){ return { started:0, completed:0, totalMistakes:0, bestMistakes:null }; }
   function defaultSlots(){ return [null,null,null].map(()=> ({ locked:false, savedAt:null, difficulty:null, state:null })); }
@@ -376,7 +405,7 @@
       btnCont.addEventListener('click',()=>{ if(!(slot && slot.state)) return; loadSlotToGame(idx); });
 
       const btnLock=document.createElement('button'); btnLock.className='btn'; btnLock.textContent = slot?.locked? 'Låst' : 'Lås';
-      btnLock.disabled = slot?.locked? false : (lockedCount>=2); // max 2 låsta totalt
+      btnLock.disabled = slot?.locked? false : (lockedCount>=2);
       btnLock.addEventListener('click',()=>{ slot.locked = !slot.locked; saveApp(); renderSlots(); });
 
       const btnDel=document.createElement('button'); btnDel.className='btn'; btnDel.textContent='Radera'; btnDel.disabled = !(slot && slot.state) || slot?.locked;
@@ -390,17 +419,15 @@
   document.querySelectorAll('[data-new]').forEach(btn=> btn.addEventListener('click',()=>startNewFlow(btn.getAttribute('data-new'))));
 
   function startNewFlow(diff){
-    // Finns ledig (olåst & tom) ?
     const freeIndex = store.slots.findIndex(s=> !s?.locked && !s?.state);
     if(freeIndex>-1){ startNewGame(diff, freeIndex); return; }
-    // Om alla fulla/låsta → välj slot (låsta döljs)
     openChooseSlot(diff);
   }
 
   function openChooseSlot(diff){
     chooseList.innerHTML='';
     store.slots.forEach((slot, idx)=>{
-      if(slot.locked) return; // visa inte låsta
+      if(slot.locked) return;
       const row=document.createElement('div'); row.className='slot';
       row.innerHTML=`<div><strong>Plats ${idx+1}</strong><div class="meta">${labelForDiff(slot.difficulty||'–')} · ${slot.savedAt||''}</div></div>`;
       const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Använd';
@@ -421,11 +448,11 @@
   }
 
   function startNewGame(diff, slotIndex){
-    const p = PUZZLES[diff];
+    const puzzlesForDiff = PUZZLES[diff];
+    const p = puzzlesForDiff[Math.floor(Math.random() * puzzlesForDiff.length)];
     state = { difficulty:diff, puzzle:p.p, solution:p.s, fixed:new Set(), main:Array(81).fill('0'), n1:Array(81).fill(0), n2:Array(81).fill(0), sel:null, mistakes:0, live:liveValidateChk.checked, history:[], redo:[] };
     for(let i=0;i<81;i++) if(p.p[i]!== '0') state.fixed.add(i);
     currentSlot = slotIndex;
-    // stats
     store.stats.started += 1; saveApp(); updateStatsUI();
     saveActive();
     showGame(); renderBoard(); mistakesEl.textContent='0'; diffTag.textContent = 'Svårighet: ' + labelForDiff(diff); setStatus('Välj en ruta.'); updateEmpties();
@@ -438,7 +465,7 @@
     saveApp(); renderSlots();
   }
 
-  function showStart(){ screenGame.classList.remove('active'); screenStart.classList.add('active'); renderSlots(); updateStatsUI(); }
+  function showStart(){ screenGame.classList.remove('active'); screenStart.classList.add('active'); renderSlots(); updateStatsUI(); currentSlot=null; }
   function showGame(){ screenStart.classList.remove('active'); screenGame.classList.add('active'); }
 
   buttons.home.addEventListener('click', showStart);
@@ -450,6 +477,12 @@
     for(let r=0;r<9;r++) for(let c=0;c<9;c++){
       const i=id(r,c);
       const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r+1; cell.dataset.c=c+1; cell.dataset.i=i;
+      
+      const boxIndex = boxOf(r, c);
+      if ([0,2,4,6,8].includes(boxIndex)) { // Index 0, 2, 4, 6, 8 (första, tredje, femte, etc.)
+          cell.classList.add('box-alt');
+      }
+
       const input=document.createElement('input'); input.setAttribute('inputmode','none'); input.setAttribute('readonly',''); input.setAttribute('tabindex','-1'); input.setAttribute('maxlength','1'); input.setAttribute('aria-label',`Rad ${r+1}, Kolumn ${c+1}`);
       if(state.puzzle[i] !== '0'){ input.value=state.puzzle[i]; cell.classList.add('readonly'); state.fixed.add(i); }
       else if(state.main[i] !== '0'){ input.value = state.main[i]; }
@@ -540,8 +573,8 @@
   function renderNotesCell(i){ const notes=boardEl.children[i].querySelector('.notes').children; for(let n=1;n<=9;n++){ const on1=(state.n1[i]&bit(n))!==0; const on2=(state.n2[i]&bit(n))!==0; const el=notes[n-1]; el.textContent = (on1||on2)? n:''; el.classList.toggle('g', on2); } }
   function setNotesMask(i,layer,mask){ if(state.fixed.has(i)) return; if(layer===1) state.n1[i]=mask; else state.n2[i]=mask; renderNotesCell(i); saveActive(); refreshHighlights(); }
   function toggleNote(i,n,layer){
-    if(state.fixed.has(i)) return; // givna får aldrig notes
-    if(state.main[i] !== '0') return; // blockera anteckningar när huvudsiffra finns
+    if(state.fixed.has(i)) return;
+    if(state.main[i] !== '0') return;
     const m=bit(n);
     if(layer===1){ state.n1[i]^=m; state.n2[i]&=~m; }
     else { state.n2[i]^=m; state.n1[i]&=~m; }
@@ -552,7 +585,7 @@
   function checkBoard(){ let wrong=0; for(let i=0;i<81;i++){ const el=boardEl.children[i]; el.classList.remove('error'); const v=valueAtIndex(i); if(v!=='0' && !state.fixed.has(i) && v!==state.solution[i]){ wrong++; el.classList.add('error'); } } if(wrong>0){ state.mistakes+=wrong; mistakesEl.textContent=String(state.mistakes); setStatus(`Hittade ${wrong} fel (markerade).`); } else setStatus('Inga fel hittade.'); saveActive(); }
 
   function isSolved(){ for(let i=0;i<81;i++){ if(valueAtIndex(i)!==state.solution[i]) return false; } return true; }
-  function onSolved(){ if(state._done) return; state._done=true; store.stats.completed+=1; store.stats.totalMistakes+=state.mistakes; if(store.stats.bestMistakes==null || state.mistakes<store.stats.bestMistakes) store.stats.bestMistakes=state.mistakes; saveApp(); updateStatsUI(); alert(`Klart! Misstag: ${state.mistakes}`); }
+  function onSolved(){ if(state._done) return; state._done=true; store.stats.completed+=1; store.stats.totalMistakes+=state.mistakes; if(store.stats.bestMistakes==null || state.mistakes<store.stats.bestMistakes) store.stats.bestMistakes=state.mistakes; saveApp(); updateStatsUI(); openWinModal(); }
 
   /* ===== Tangentbord & hint ===== */
   function buildPads(){ for(let n=1;n<=9;n++){ const b=document.createElement('button'); b.className='btn'; b.textContent=n; b.dataset.n=String(n); b.addEventListener('click',()=>{ if(state.sel==null) return; performAction(makeSetMainAction(state.sel, String(n))); }); pads.main.appendChild(b); }
@@ -590,14 +623,21 @@
       const current=getComputedStyle(document.body).getPropertyValue(varName).trim();
       candidates.forEach(hex=>{ const d=document.createElement('div'); d.className='swatch'; d.style.background=hex; if(toHex(current)===toHex(hex)) d.classList.add('is-selected'); d.addEventListener('click',()=>{ document.body.style.setProperty(varName, hex); const inpId=colorInputs[varName]; if(inpId){ const el=document.getElementById(inpId); if(el) el.value=hex; } makeSwatches(); saveThemeVars(); }); host.appendChild(d); });
     }
-    // uppdatera även rutnäts-swatcharna
     makeGridSwatches();
   }
 
-  let lastFocused=null; const openSettings=()=>{ lastFocused=document.activeElement; modal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> themeSelect.focus(),0); }; const closeSettings=()=>{ modal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); };
+  let lastFocused=null;
+  const openSettings=()=>{ lastFocused=document.activeElement; modal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> themeSelect.focus(),0); };
+  const closeSettings=()=>{ modal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); };
+  
+  const openWinModal=()=>{ lastFocused=document.activeElement; winMistakes.textContent = state.mistakes; winModal.classList.add('open'); appRoot.setAttribute('inert',''); setTimeout(()=> document.getElementById('winNewGame').focus(),0); };
+  const closeWinModal=()=>{ winModal.classList.remove('open'); appRoot.removeAttribute('inert'); lastFocused && lastFocused.focus(); };
 
   /* ===== Events ===== */
   document.getElementById('btnSettings').addEventListener('click',openSettings); document.getElementById('closeSettings').addEventListener('click',closeSettings); modal.addEventListener('click', (e)=>{ if(e.target===modal) closeSettings(); });
+  document.getElementById('winHome').addEventListener('click', ()=>{ closeWinModal(); showStart(); });
+  document.getElementById('winNewGame').addEventListener('click', ()=>{ closeWinModal(); startNewFlow(state.difficulty); });
+  
   themeSelect.addEventListener('change',()=> setTheme(themeSelect.value));
   liveValidateChk.addEventListener('change',()=>{ state.live = liveValidateChk.checked; saveActive(); refreshHighlights(); });
   for(const [varName, idc] of Object.entries(colorInputs)){ const el=document.getElementById(idc); el.addEventListener('input',()=>{ document.body.style.setProperty(varName, el.value); makeSwatches(); saveThemeVars(); if(varName==='--grid') makeGridSwatches(); }); }
@@ -606,15 +646,10 @@
 
   window.addEventListener('keydown', (e)=>{ if(document.body.hasAttribute('inert')) return; if(state.sel==null || !screenGame.classList.contains('active')) return; if(e.key>='1' && e.key<='9'){ performAction(makeSetMainAction(state.sel, e.key)); } if(e.key==='Backspace'||e.key==='Delete'){ performAction(makeClearMainKeepNotesAction(state.sel)); } if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){ e.preventDefault(); let r=rOf(state.sel), c=cOf(state.sel); if(e.key==='ArrowUp') r=Math.max(0,r-1); if(e.key==='ArrowDown') r=Math.min(8,r+1); if(e.key==='ArrowLeft') c=Math.max(0,c-1); if(e.key==='ArrowRight') c=Math.min(8,c+1); state.sel=id(r,c); refreshHighlights(); } });
 
-  buttons.home.addEventListener('click', showStart);
-
   /* ===== Init ===== */
   function init(){
-    // Startskärm
     renderSlots(); updateStatsUI();
-    // Tema + swatches
     loadTheme(); loadThemeVars(); makeSwatches();
-    // Tangentbord
     buildPads();
   }
   init();
